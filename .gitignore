@@ -4,6 +4,10 @@
 # DB Config
 config.py
 
+# Kakao login Config
+kakao_config.py
+
+
 ### Flask ###
 instance/*
 !instance/.gitignore
