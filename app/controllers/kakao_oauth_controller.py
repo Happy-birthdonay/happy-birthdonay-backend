@@ -8,12 +8,12 @@ class KakaoOAuthController:
         self.oauth_server = 'https://kauth.kakao.com%s'
         self.api_server = 'https://kapi.kakao.com%s'
         self.default_headers = {
-            'Content-Type': 'application/x-www-form-urlencoded',
+            'Content-Type': 'application/x-www-form-urlencoded;charset=utf-8',
             'Cache-Control': 'no-cache'
         }
 
     def authorization(self, code):
-        url = self.oauth_server % '/oauth'
+        url = self.oauth_server % '/oauth/token'
         params = {
             'grant_type': 'authorization_code',
             'client_id': KAKAO_REST_API_KEY,
@@ -22,7 +22,7 @@ class KakaoOAuthController:
             'response_type': code
         }
 
-        return requests.post(url, headers=self.default_headers, params=params).json()
+        return requests.post(url, headers=self.default_headers, params=params)
 
     def get_user_info(self, access_token):
         url = self.api_server % '/v2/user/me'
@@ -34,4 +34,4 @@ class KakaoOAuthController:
             'property_keys': ["kakao_account.name", "kakao_account.birthday"]
         }
 
-        return requests.post(url, headers=headers, params=params).json()
+        return requests.post(url, headers=headers, params=params)

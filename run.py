@@ -1,8 +1,6 @@
-from flask import request, jsonify
+from flask import request, jsonify, logging
 
 from app import create_app
-from app.models.user_model import User
-from app.models.donation_box_model import DonationBox
 
 from app.controllers.kakao_oauth_controller import KakaoOAuthController
 
@@ -11,15 +9,21 @@ app = create_app()
 
 
 # Routes
+
 @app.route('/oauth/token')
 def kakao_oauth():
     # Get the code from the request
-    # TODO: - Check the code is valid
     code = request.get_json()['code']
 
+    # Authorize the code and get access token
     kakao_oauth_controller = KakaoOAuthController()
     authorization_infos = kakao_oauth_controller.authorization(code)
-    access_token = authorization_infos['access_token']
+
+    # logger = logging.create_logger(app)
+    # logger.debug(authorization_infos.text)
+
+    # Get user info using kakao access token
+    access_token = authorization_infos.json()['access_token']
     user_infos = kakao_oauth_controller.get_user_info(access_token)
 
     if access_token is None or user_infos is None:
