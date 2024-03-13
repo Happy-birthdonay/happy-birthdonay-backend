@@ -1,38 +1,55 @@
+from flask import request, jsonify, logging
+
 from app import create_app
-from app.models.user_model import User
-from app.models.donation_box_model import DonationBox
+
+from app.controllers.kakao_oauth_controller import KakaoOAuthController
 
 # Start of the App
 app = create_app()
 
 
 # Routes
-@app.route('/hw')
-def hello_world():
-    return 'Hello, World!'
 
+@app.route('/oauth/token')
+def kakao_oauth():
+    # Get the code from the request
+    code = request.get_json()['code']
 
-@app.route('/users')
-def get_all_users():
-    users = User.query.all()
-    return {
-        'user_id': [user.user_id for user in users],
-        'name': [user.name for user in users],
-        'birthday': [user.birthday for user in users],
-        'access_token': [user.access_token for user in users],
-        'refresh_token': [user.refresh_token for user in users]
-    }
+    # Authorize the code and get access token
+    kakao_oauth_controller = KakaoOAuthController()
+    authorization_infos = kakao_oauth_controller.authorization(code)
 
+    # logger = logging.create_logger(app)
+    # logger.debug(authorization_infos.text)
 
-@app.route('/donation-boxes/<int:box_id>')
-def get_donation_box(box_id):
-    boxInfo = DonationBox.query.filter_by(id=box_id).first()
-    return {
-        'box_id': boxInfo.id,
-        'name': boxInfo.name,
-        'description': boxInfo.description,
-        'user_id': boxInfo.user_id,
-    }
+    # Get user info using kakao access token
+    access_token = authorization_infos.json()['access_token']
+    user_infos = kakao_oauth_controller.get_user_info(access_token)
+
+    if access_token is None or user_infos is None:
+        # TODO: - Make the response more specific
+        return jsonify({
+            'result': 'failure',
+            'message': '카카오 로그인에 실패했습니다.'
+        }), 401
+    else:
+        res = jsonify({
+            'result': 'success',
+            'message': '카카오 로그인에 성공했습니다.',
+            'data': {
+                'name': user_infos['kakao_account']['name'],
+                'birthday': user_infos['kakao_account']['birthday'],
+            }
+        })
+
+        # TODO: - Make our own access_token
+        new_access_token = 'temporary_new_access_token'
+        new_refresh_token = 'temporary_new_refresh_token'
+
+        res.set_cookie('access_token', new_access_token)
+        res.set_cookie('refresh_token', new_refresh_token)
+
+        return res, 200
 
 
 # Run the App
