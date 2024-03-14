@@ -1,5 +1,5 @@
 from flask import request, jsonify, logging
-from flask_jwt_extended import JWTManager, create_access_token, create_refresh_token
+from flask_jwt_extended import JWTManager, create_access_token, create_refresh_token, jwt_required
 
 from app import create_app, db
 
@@ -14,7 +14,15 @@ jwt = JWTManager(app)
 
 # Routes
 
-@app.route('/oauth/token')
+# MARK: - Kakao OAuth
+# 1. Get the code from the request
+# 2. Authorize the code and get access token from Kakao
+# 3. Get user info using Kakao access token
+# 4. Store user info in the database
+# 5. Get user id from the database
+# 6. Make our own tokens
+# 7. Send and store the tokens to the client
+@app.route('/oauth/token', methods=['POST'])
 def kakao_oauth():
     # Get the code from the request
     code = request.get_json()['code']
@@ -35,10 +43,6 @@ def kakao_oauth():
         return jsonify(result='failure',
                        message='Failed Kakao Login'), 401
     else:
-        # TODO: - 1. Store user info in the database
-        # TODO: - 2. Get user id from the database
-        # TODO: - 3. Make our own tokens
-
         # new_user = user.User(name=user_infos['kakao_account']['name'],
         #                      birthday=user_infos['kakao_account']['birthday'])
         new_user = user.User(name="eunbin",
@@ -61,6 +65,66 @@ def kakao_oauth():
         res.set_cookie('refresh_token', new_refresh_token)
 
         return res, 200
+
+
+@app.route('/sign-up/{int:user_id}', methods=['PATCH'])
+@jwt_required()
+def sign_up(user_id):
+    pass
+
+
+@app.route('/users', methods=['GET'])
+@jwt_required()
+def get_users():
+    pass
+
+
+@app.route('/donation-boxes', methods=['POST'])
+@jwt_required()
+def create_donation_box():
+    pass
+
+
+@app.route('/donation-boxes', methods=['GET'])
+@jwt_required()
+def get_donation_boxes():
+    pass
+
+
+@app.route('donation-boxes/<int:donation_box_id>', methods=['GET'])
+@jwt_required()
+def get_donation_box(donation_box_id):
+    pass
+
+
+@app.route('donation-boxes/<int:donation_box_id>', methods=['PATCH'])
+@jwt_required()
+def update_donation_box(donation_box_id):
+    pass
+
+
+@app.route('messages', methods=['POST'])
+@jwt_required()
+def create_message():
+    pass
+
+
+@app.route('messages', methods=['GET'])
+@jwt_required()
+def get_messages():
+    pass
+
+
+@app.route('certifications', methods=['POST'])
+@jwt_required()
+def create_certification():
+    pass
+
+
+@app.route('certifications/<int:donation_box_id>', methods=['GET'])
+@jwt_required()
+def get_certification(donation_box_id):
+    pass
 
 
 # Run the App
