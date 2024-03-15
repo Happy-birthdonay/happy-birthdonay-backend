@@ -19,7 +19,7 @@ class KakaoOAuthController:
             'client_id': KAKAO_REST_API_KEY,
             'client_secret': KAKAO_CLIENT_SECRET,
             'redirect_uri': KAKAO_REDIRECT_URI,
-            'response_type': code
+            'code': code
         }
 
         return requests.post(url, headers=self.default_headers, params=params)

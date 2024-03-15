@@ -14,6 +14,10 @@ jwt = JWTManager(app)
 
 # Routes
 
+@app.route('/hello')
+def index():
+    return 'Hello, World!'
+
 # MARK: - Kakao OAuth
 # 1. Get the code from the request
 # 2. Authorize the code and get access token from Kakao
@@ -22,7 +26,7 @@ jwt = JWTManager(app)
 # 5. Get user id from the database
 # 6. Make our own tokens
 # 7. Send and store the tokens to the client
-@app.route('/oauth/token', methods=['POST'])
+@app.route('/oauth/token')
 def kakao_oauth():
     # Get the code from the request
     code = request.get_json()['code']
@@ -31,8 +35,8 @@ def kakao_oauth():
     kakao_oauth_controller = KakaoOAuthController()
     authorization_infos = kakao_oauth_controller.authorization(code)
 
-    # logger = logging.create_logger(app)
-    # logger.debug(authorization_infos.text)
+    logger = logging.create_logger(app)
+    logger.debug(authorization_infos.text)
 
     # Get user info using kakao access token
     access_token = authorization_infos.json()['access_token']
@@ -91,37 +95,37 @@ def get_donation_boxes():
     pass
 
 
-@app.route('donation-boxes/<int:donation_box_id>', methods=['GET'])
+@app.route('/donation-boxes/<int:donation_box_id>', methods=['GET'])
 @jwt_required()
 def get_donation_box(donation_box_id):
     pass
 
 
-@app.route('donation-boxes/<int:donation_box_id>', methods=['PATCH'])
+@app.route('/donation-boxes/<int:donation_box_id>', methods=['PATCH'])
 @jwt_required()
 def update_donation_box(donation_box_id):
     pass
 
 
-@app.route('messages', methods=['POST'])
+@app.route('/messages', methods=['POST'])
 @jwt_required()
 def create_message():
     pass
 
 
-@app.route('messages', methods=['GET'])
+@app.route('/messages', methods=['GET'])
 @jwt_required()
 def get_messages():
     pass
 
 
-@app.route('certifications', methods=['POST'])
+@app.route('/certifications', methods=['POST'])
 @jwt_required()
 def create_certification():
     pass
 
 
-@app.route('certifications/<int:donation_box_id>', methods=['GET'])
+@app.route('/certifications/<int:donation_box_id>', methods=['GET'])
 @jwt_required()
 def get_certification(donation_box_id):
     pass
