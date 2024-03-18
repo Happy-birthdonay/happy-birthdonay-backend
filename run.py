@@ -1,5 +1,6 @@
 from flask import request, jsonify, logging
 from flask_jwt_extended import JWTManager, create_access_token, create_refresh_token, jwt_required
+from datetime import datetime
 
 from app import create_app, db
 
@@ -11,22 +12,11 @@ from app.models import user_model as user
 app = create_app()
 jwt = JWTManager(app)
 
+logger = logging.create_logger(app)
+
 
 # Routes
-
-@app.route('/hello')
-def index():
-    return 'Hello, World!'
-
-# MARK: - Kakao OAuth
-# 1. Get the code from the request
-# 2. Authorize the code and get access token from Kakao
-# 3. Get user info using Kakao access token
-# 4. Store user info in the database
-# 5. Get user id from the database
-# 6. Make our own tokens
-# 7. Send and store the tokens to the client
-@app.route('/oauth/token')
+@app.route('/oauth/token', methods=['POST'])
 def kakao_oauth():
     # Get the code from the request
     code = request.get_json()['code']
@@ -35,40 +25,47 @@ def kakao_oauth():
     kakao_oauth_controller = KakaoOAuthController()
     authorization_infos = kakao_oauth_controller.authorization(code)
 
-    logger = logging.create_logger(app)
-    logger.debug(authorization_infos.text)
-
-    # Get user info using kakao access token
-    access_token = authorization_infos.json()['access_token']
-    user_infos = kakao_oauth_controller.get_user_info(access_token)
-
-    if access_token is None or user_infos is None:
+    if authorization_infos.get('access_token') is None:
         # TODO: - Make the response more specific
         return jsonify(result='failure',
                        message='Failed Kakao Login'), 401
-    else:
-        # new_user = user.User(name=user_infos['kakao_account']['name'],
-        #                      birthday=user_infos['kakao_account']['birthday'])
-        new_user = user.User(name="eunbin",
-                             birthday="0128")
-        # MARK: - How to convert the string to datetime with format(YYYYMMDD)?
-        new_user_id = 222
 
-        # db.session.add(new_user)
-        # db.session.commit()
-        # MARK: - How to get the user id from the database?
+    # Get user info using kakao access token
+    access_token = authorization_infos['access_token']
+    user_infos = kakao_oauth_controller.get_user_info(access_token)
 
-        new_access_token = create_access_token(identity=new_user_id, additional_claims=new_user.to_json())
-        new_refresh_token = create_refresh_token(identity=new_user_id, additional_claims=new_user.to_json())
+    if user_infos is None:
+        # TODO: - Make the response more specific
+        return jsonify(result='failure',
+                       message='Failed Kakao Login'), 401
 
-        res = jsonify(result='success',
-                      message='Succeeded Kakao Login',
-                      data=new_user.to_json())
+    # Add the user to the database
+    new_user = user.User(name=user_infos['kakao_account']['name'],
+                         birthday=datetime.strptime(user_infos['kakao_account']['birthday'], '%m%d'))
+    db.session.add(new_user)
+    db.session.commit()
+    db.session.refresh(new_user)
 
-        res.set_cookie('access_token', new_access_token)
-        res.set_cookie('refresh_token', new_refresh_token)
+    # Make tokens and add them to the user
+    new_user_dict = dict(new_user)
+    new_user_token_data = {'name': new_user.name, 'birthday': new_user.birthday}
+    new_access_token = create_access_token(identity=new_user_dict['user_id'], additional_claims=new_user_token_data)
+    new_refresh_token = create_refresh_token(identity=new_user_dict['user_id'], additional_claims=new_user_token_data)
 
-        return res, 200
+    new_user.access_token = new_access_token
+    new_user.refresh_token = new_refresh_token
+    db.session.commit()
+
+    # Make the response
+    res = jsonify(result='success',
+                  message='Succeeded Kakao Login',
+                  data=new_user_dict)
+
+    # Set the cookies
+    res.set_cookie('access_token', new_access_token)
+    res.set_cookie('refresh_token', new_refresh_token)
+
+    return res, 200
 
 
 @app.route('/sign-up/{int:user_id}', methods=['PATCH'])
@@ -133,4 +130,4 @@ def get_certification(donation_box_id):
 
 # Run the App
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, port=8000)
