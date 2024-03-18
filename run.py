@@ -72,7 +72,30 @@ def kakao_oauth():
 @app.route('/sign-up/{int:user_id}', methods=['PATCH'])
 @jwt_required()
 def sign_up(user_id):
-    pass
+    # Get the new data from the request
+    new_data = request.get_json()
+
+    # TODO: - Validate Access Token from the header
+
+    # Query the user
+    current_user = user.User.query.filter_by(user_id=user_id).first()
+
+    # Check if the new data is valid
+    if new_data.get('name') is None or new_data.get('birthday') is None:
+        return jsonify(result='failure',
+                       message='Invalid Data'), 400
+
+    # Update the user
+    if new_data['name'] != current_user.name:
+        current_user.name = new_data['name']
+    if new_data['birthday'] != current_user.birthday:
+        current_user.birthday = new_data['birthday']
+
+    # Commit the changes to the database
+    db.session.commit()
+
+    return jsonify(result='success',
+                   message='Succeeded Sign Up'), 200
 
 
 @app.route('/users', methods=['GET'])
