@@ -42,3 +42,16 @@ class DonationBox(db.Model):
         self.color = color
         self.user_id = user_id
         self.updated_at = datetime.datetime.now()
+
+    def __iter__(self):
+        yield 'id', self.id
+        yield 'name', self.name
+        yield 'url', self.url
+        yield 'description', self.description
+        yield 'amount', self.amount
+        yield 'color', self.color
+        yield 'is_donated', self.is_donated
+        yield 'cert_img_url', self.cert_img_url
+        yield 'cert_created_at', self.cert_created_at
+        yield 'user_id', self.user_id
+        yield 'updated_at', self.updated_at

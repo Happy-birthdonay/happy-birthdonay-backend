@@ -30,3 +30,11 @@ class Message(db.Model):
         self.tag = tag
         self.content = content
         self.created_at = datetime.datetime.now()
+
+    def __iter__(self):
+        yield 'id', self.id
+        yield 'box_id', self.box_id
+        yield 'created_by', self.created_by
+        yield 'tag', self.tag
+        yield 'content', self.content
+        yield 'created_at', self.created_at

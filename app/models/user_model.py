@@ -20,13 +20,21 @@ class User(db.Model):
     user_id = db.Column(db.Integer, primary_key=True, autoincrement=True, nullable=False)
     name = db.Column(db.String(50), nullable=False)
     birthday = db.Column(db.DateTime, nullable=False, default=KST)
-    access_token = db.Column(db.String(250), nullable=False)
-    refresh_token = db.Column(db.String(250), nullable=False)
-    updated_at = db.Column(db.DateTime, default=KST, onupdate=KST)
+    access_token = db.Column(db.String(500), nullable=False)
+    refresh_token = db.Column(db.String(500), nullable=False)
+    updated_at = db.Column(db.DateTime, default=KST)
 
-    def __init__(self, name, birthday, access_token, refresh_token):
+    def __init__(self, name, birthday):
         self.name = name
         self.birthday = birthday
-        self.access_token = access_token
-        self.refresh_token = refresh_token
         self.updated_at = datetime.datetime.now()
+        self.access_token = ''
+        self.refresh_token = ''
+
+    def __iter__(self):
+        yield 'user_id', self.user_id
+        yield 'name', self.name
+        yield 'birthday', self.birthday
+        yield 'access_token', self.access_token
+        yield 'refresh_token', self.refresh_token
+        yield 'updated_at', self.updated_at
