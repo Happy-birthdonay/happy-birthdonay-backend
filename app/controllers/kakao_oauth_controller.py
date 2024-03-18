@@ -22,7 +22,7 @@ class KakaoOAuthController:
             'code': code
         }
 
-        return requests.post(url, headers=self.default_headers, params=params)
+        return requests.post(url, headers=self.default_headers, params=params).json()
 
     def get_user_info(self, access_token):
         url = self.api_server % '/v2/user/me'
@@ -30,8 +30,5 @@ class KakaoOAuthController:
             **self.default_headers,
             **{'Authorization': f'Bearer {access_token}'}
         }
-        params = {
-            'property_keys': ["kakao_account.name", "kakao_account.birthday"]
-        }
 
-        return requests.post(url, headers=headers, params=params)
+        return requests.post(url, headers=headers).json()
