@@ -40,6 +40,7 @@ def kakao_oauth():
                        message='Failed Kakao Login'), 401
 
     # Add the user to the database
+    # TODO: - Check if the user already exists
     new_user = user.User(name=user_infos['kakao_account']['name'],
                          birthday=datetime.strptime(user_infos['kakao_account']['birthday'], '%m%d'))
     db.session.add(new_user)
