@@ -49,9 +49,8 @@ def kakao_oauth():
 
     # Make tokens and add them to the user
     new_user_dict = dict(new_user)
-    new_user_token_data = {'name': new_user.name, 'birthday': new_user.birthday}
-    new_access_token = create_access_token(identity=new_user_dict['user_id'], additional_claims=new_user_token_data)
-    new_refresh_token = create_refresh_token(identity=new_user_dict['user_id'], additional_claims=new_user_token_data)
+    new_access_token = create_access_token(identity=new_user_dict['user_id'], additional_claims=new_user_dict)
+    new_refresh_token = create_refresh_token(identity=new_user_dict['user_id'], additional_claims=new_user_dict)
 
     new_user.access_token = new_access_token
     new_user.refresh_token = new_refresh_token
