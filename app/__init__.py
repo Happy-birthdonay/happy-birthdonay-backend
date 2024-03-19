@@ -11,6 +11,7 @@ def create_app(test_config=None):
     app.debug = True
     app.config['SQLALCHEMY_DATABASE_URI'] = DB_URL
     app.config['JWT_SECRET_KEY'] = JWT_SECRET_KEY
+    app.config['JSON_AS_ASCII'] = False
 
     # Database Setting
     db.init_app(app)
