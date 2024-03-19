@@ -28,7 +28,7 @@ def kakao_oauth():
     if authorization_infos.get('access_token') is None:
         # TODO: - Make the response more specific
         return jsonify(result='failure',
-                       message='Failed Kakao Login'), 401
+                       message='Failed Kakao Login: No access token'), 401
 
     # Get user info using kakao access token
     access_token = authorization_infos['access_token']
@@ -37,7 +37,7 @@ def kakao_oauth():
     if user_infos is None:
         # TODO: - Make the response more specific
         return jsonify(result='failure',
-                       message='Failed Kakao Login'), 401
+                       message='Failed Kakao Login: No user information'), 401
 
     # Add the user to the database
     # TODO: - Check if the user already exists
