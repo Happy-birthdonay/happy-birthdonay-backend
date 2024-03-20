@@ -7,6 +7,7 @@ from app import create_app, db
 from app.controllers.kakao_oauth_controller import KakaoOAuthController
 
 from app.models import user_model as user
+from app.models import donation_box_model as donation_box
 
 # Start of the App
 app = create_app()
@@ -27,7 +28,6 @@ def kakao_oauth():
     authorization_infos = kakao_oauth_controller.authorization(code)
 
     if authorization_infos.get('access_token') is None:
-        # TODO: - Make the response more specific
         return jsonify(result='failure',
                        message='Failed Kakao Login: No access token'), 401
 
@@ -36,21 +36,28 @@ def kakao_oauth():
     user_infos = kakao_oauth_controller.get_user_info(access_token)
 
     if user_infos is None:
-        # TODO: - Make the response more specific
         return jsonify(result='failure',
                        message='Failed Kakao Login: No user information'), 401
 
     # Query the user
     queried_user = user.User.query.filter_by(kakao_id=user_infos['id']).first()
+
+    # If the user already exists, make the response and set the cookies
     if queried_user is not None:
-        return jsonify(result='succeed',
-                       message='Succeeded Kakao Login: User already exists',
-                       data=dict(queried_user)), 200
+        res = jsonify(result='succeed',
+                      message='Succeeded Kakao Login: User already exists',
+                      data=dict(queried_user))
+
+        # TODO: - Is access token and refresh token should be updated?
+        res.set_cookie('access_token', queried_user.access_token)
+        res.set_cookie('refresh_token', queried_user.refresh_token)
+        return res, 200
 
     # Add the new user to the database
     new_user = user.User(name=user_infos['kakao_account']['name'],
                          birthday=user_infos['kakao_account']['birthday'],
                          kakao_id=user_infos['id'])
+    # TODO: - If the db commit fails, the response should be failed
     db.session.add(new_user)
     db.session.commit()
     db.session.refresh(new_user)
@@ -60,6 +67,7 @@ def kakao_oauth():
     new_access_token = create_access_token(identity=new_user_dict['user_id'], additional_claims=new_user_dict)
     new_refresh_token = create_refresh_token(identity=new_user_dict['user_id'], additional_claims=new_user_dict)
 
+    # TODO: - If the db commit fails, the response should be failed
     new_user.access_token = new_access_token
     new_user.refresh_token = new_refresh_token
     db.session.commit()
@@ -100,6 +108,7 @@ def sign_up():
         current_user.birthday = new_data['birthday']
 
     # Commit the changes to the database and make the response data
+    # TODO: - If the db commit fails, the response should be failed
     db.session.commit()
     changed_user_data = {
         'user_id': current_user.user_id,
@@ -139,7 +148,37 @@ def get_users():
 @app.route('/donation-boxes', methods=['POST'])
 @jwt_required()
 def create_donation_box():
-    pass
+    # Get the new data from the request
+    new_data = request.get_json()
+
+    # Get the user id from the token
+    user_id = get_jwt_identity()
+
+    # Check if the new data is valid
+    for key in donation_box.BOX_VALUES:
+        if new_data.get(key) is None:
+            return jsonify(result='failure',
+                           message=f'Invalid Data: No {key}'), 401
+
+    # Add the new donation box to the database
+    new_donation_box = donation_box.DonationBox(name=new_data['name'],
+                                                url=new_data['url'],
+                                                description=new_data['description'],
+                                                amount=new_data['amount'],
+                                                color=new_data['color'],
+                                                user_id=user_id)
+
+    db.session.add(new_donation_box)
+    db.session.commit()
+    db.session.refresh(new_donation_box)
+
+    # TODO: - If the db commit fails, the response should be failed
+    # Make the response data
+    res = jsonify(result='success',
+                  message='Succeeded Create Donation Box',
+                  data=dict(new_donation_box))
+
+    return res, 200
 
 
 @app.route('/donation-boxes', methods=['GET'])

@@ -3,6 +3,8 @@ from app.models import db
 
 KST = datetime.timezone(datetime.timedelta(hours=9))
 
+BOX_VALUES = ['name', 'url', 'description', 'amount', 'color']
+
 
 class DonationBox(db.Model):
     """
@@ -22,7 +24,7 @@ class DonationBox(db.Model):
 
     __tablename__ = 'donation_box'
 
-    id = db.Column(db.Integer, primary_key=True, autoincrement=True, nullable=False)
+    box_id = db.Column(db.Integer, primary_key=True, autoincrement=True, nullable=False)
     name = db.Column(db.String(100), nullable=False)
     url = db.Column(db.String(250), nullable=False)
     description = db.Column(db.String(200), nullable=False)
@@ -30,7 +32,7 @@ class DonationBox(db.Model):
     color = db.Column(db.String(45), nullable=False)
     is_donated = db.Column(db.Boolean, nullable=False, default=False)
     cert_img_url = db.Column(db.String(250), nullable=True)
-    cert_created_at = db.Column(db.DateTime, default=KST)
+    cert_created_at = db.Column(db.DateTime, nullable=True, default=KST)
     user_id = db.Column(db.Integer, db.ForeignKey('user.user_id'), nullable=False)
     updated_at = db.Column(db.DateTime, default=KST, onupdate=KST)
 
@@ -44,7 +46,7 @@ class DonationBox(db.Model):
         self.updated_at = datetime.datetime.now()
 
     def __iter__(self):
-        yield 'id', self.id
+        yield 'box_id', self.box_id
         yield 'name', self.name
         yield 'url', self.url
         yield 'description', self.description
