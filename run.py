@@ -1,5 +1,5 @@
 from flask import request, jsonify, logging
-from flask_jwt_extended import JWTManager, create_access_token, create_refresh_token, jwt_required
+from flask_jwt_extended import JWTManager, create_access_token, create_refresh_token, jwt_required, get_jwt_identity
 from datetime import datetime
 
 from app import create_app, db
@@ -14,6 +14,7 @@ jwt = JWTManager(app)
 
 # Logger
 logger = logging.create_logger(app)
+
 
 # Routes
 @app.route('/oauth/token', methods=['POST'])
@@ -81,9 +82,8 @@ def sign_up():
     # Get the new data from the request
     new_data = request.get_json()
 
-    # TODO: - Validate Access Token from the header
-    # TODO: - Get user_id from the access token
-    user_id = 1
+    # Get the user id from the token
+    user_id = get_jwt_identity()
 
     # Query the user
     current_user = user.User.query.filter_by(user_id=user_id).first()
