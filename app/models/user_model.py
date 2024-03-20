@@ -9,7 +9,8 @@ class User(db.Model):
     User Model
     - user_id: 사용자 아이디, INT, PK
     - name: 사용자 이름, VARCHAR(50)
-    - birthday: 사용자 생일, DATETIME
+    - birthday: 사용자 생일, VARCHAR(6)
+    - kakao_id: 카카오 아이디, INT
     - access_token: 사용자 토큰, VARCHAR(250)
     - refresh_token: 사용자 리프레시 토큰, VARCHAR(250)
     - updated_at: 업데이트 시간, DATETIME
@@ -19,7 +20,7 @@ class User(db.Model):
 
     user_id = db.Column(db.Integer, primary_key=True, autoincrement=True, nullable=False)
     name = db.Column(db.String(50), nullable=False)
-    birthday = db.Column(db.DateTime, nullable=False, default=KST)
+    birthday = db.Column(db.String(6), nullable=False)
     kakao_id = db.Column(db.Integer, nullable=False)
     access_token = db.Column(db.String(500), nullable=False)
     refresh_token = db.Column(db.String(500), nullable=False)

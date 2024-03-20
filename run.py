@@ -12,8 +12,8 @@ from app.models import user_model as user
 app = create_app()
 jwt = JWTManager(app)
 
+# Logger
 logger = logging.create_logger(app)
-
 
 # Routes
 @app.route('/oauth/token', methods=['POST'])
@@ -48,7 +48,7 @@ def kakao_oauth():
 
     # Add the new user to the database
     new_user = user.User(name=user_infos['kakao_account']['name'],
-                         birthday=datetime.strptime(user_infos['kakao_account']['birthday'], '%m%d'),
+                         birthday=user_infos['kakao_account']['birthday'],
                          kakao_id=user_infos['id'])
     db.session.add(new_user)
     db.session.commit()
@@ -75,13 +75,15 @@ def kakao_oauth():
     return res, 200
 
 
-@app.route('/sign-up/{int:user_id}', methods=['PATCH'])
+@app.route('/sign-up', methods=['PATCH'])
 @jwt_required()
-def sign_up(user_id):
+def sign_up():
     # Get the new data from the request
     new_data = request.get_json()
 
     # TODO: - Validate Access Token from the header
+    # TODO: - Get user_id from the access token
+    user_id = 1
 
     # Query the user
     current_user = user.User.query.filter_by(user_id=user_id).first()
@@ -89,7 +91,7 @@ def sign_up(user_id):
     # Check if the new data is valid
     if new_data.get('name') is None or new_data.get('birthday') is None:
         return jsonify(result='failure',
-                       message='Invalid Data'), 400
+                       message='Invalid Data'), 401
 
     # Update the user
     if new_data['name'] != current_user.name:
