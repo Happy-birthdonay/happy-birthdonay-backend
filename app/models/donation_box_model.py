@@ -9,7 +9,7 @@ BOX_VALUES = ['name', 'url', 'description', 'amount', 'color']
 class DonationBox(db.Model):
     """
     DonationBox Model
-    - id: 상자 아이디, INT, PK
+    - box_id: 상자 아이디, INT, PK
     - name: 상자 이름, VARCHAR(100)
     - url: 상자 URL, VARCHAR(250)
     - description: 상자 설명, VARCHAR(200)

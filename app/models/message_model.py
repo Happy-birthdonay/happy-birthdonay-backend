@@ -7,7 +7,7 @@ KST = datetime.timezone(datetime.timedelta(hours=9))
 class Message(db.Model):
     """
     Message Model
-    - id: 메시지 아이디, INT, PK
+    - message_id: 메시지 아이디, INT, PK
     - box_id: 박스 아이디, INT, FK
     - created_by: 메시지 보낸 사람, VARCHAR(20)
     - tag: 태그 - 메시지 테마, VARCHAR(45)
@@ -17,7 +17,7 @@ class Message(db.Model):
 
     __tablename__ = 'message'
 
-    id = db.Column(db.Integer, primary_key=True, autoincrement=True, nullable=False)
+    message_id = db.Column(db.Integer, primary_key=True, autoincrement=True, nullable=False)
     box_id = db.Column(db.Integer, db.ForeignKey('donation_box.id'), nullable=False)
     created_by = db.Column(db.String(20), nullable=False)
     tag = db.Column(db.String(45), nullable=False)
@@ -32,7 +32,7 @@ class Message(db.Model):
         self.created_at = datetime.datetime.now()
 
     def __iter__(self):
-        yield 'id', self.id
+        yield 'message_id', self.message_id
         yield 'box_id', self.box_id
         yield 'created_by', self.created_by
         yield 'tag', self.tag

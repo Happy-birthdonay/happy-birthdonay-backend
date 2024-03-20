@@ -8,6 +8,7 @@ from app.controllers.kakao_oauth_controller import KakaoOAuthController
 
 from app.models import user_model as user
 from app.models import donation_box_model as donation_box
+from app.models import message_model as message
 
 # Start of the App
 app = create_app()
@@ -167,36 +168,98 @@ def create_donation_box():
                                                 amount=new_data['amount'],
                                                 color=new_data['color'],
                                                 user_id=user_id)
-
     db.session.add(new_donation_box)
     db.session.commit()
     db.session.refresh(new_donation_box)
 
     # TODO: - If the db commit fails, the response should be failed
     # Make the response data
-    res = jsonify(result='success',
-                  message='Succeeded Create Donation Box',
-                  data=dict(new_donation_box))
+    res_data = {
+        'box_id': new_donation_box.box_id,
+        'name': new_donation_box.name,
+        'color': new_donation_box.color
+    }
 
-    return res, 200
+    return jsonify(result='success',
+                   message='Succeeded Create Donation Box',
+                   data=res_data), 200
 
 
 @app.route('/donation-boxes', methods=['GET'])
 @jwt_required()
 def get_donation_boxes():
-    pass
+    # Get the user id from the token
+    user_id = get_jwt_identity()
+
+    # Query the donation boxes
+    donation_boxes = donation_box.DonationBox.query.filter_by(user_id=user_id).all()
+
+    if donation_boxes is None:
+        return jsonify(result='failure',
+                       message='No Donation Box found'), 401
+
+    # Make the response data
+    res_data = [{
+        'box_id': box.box_id,
+        'color': box.color,
+    } for box in donation_boxes]
+
+    return jsonify(result='success',
+                   message='Succeeded Get Donation Boxes',
+                   data=res_data), 200
 
 
 @app.route('/donation-boxes/<int:donation_box_id>', methods=['GET'])
 @jwt_required()
 def get_donation_box(donation_box_id):
-    pass
+    # Get the user id from the token
+    user_id = get_jwt_identity()
+
+    # Query the donation box
+    queried_donation_box = donation_box.DonationBox.query.filter_by(box_id=donation_box_id, user_id=user_id).first()
+    open_date_str = user.User.query.filter_by(user_id=user_id).first().birthday
+    queried_messages = message.Message.query.filter_by(box_id=donation_box_id).count()
+
+    if queried_donation_box is None:
+        return jsonify(result='failure',
+                       message='No Donation Box found'), 401
+
+    # Make the response data
+    res_data = dict(queried_donation_box)
+    res_data.update({'open_date': f'{datetime.date.today().year}{open_date_str}'})
+    res_data.update({'message_count': queried_messages})
+
+    return jsonify(result='success',
+                   message='Succeeded Get Donation Box',
+                   data=res_data), 200
 
 
 @app.route('/donation-boxes/<int:donation_box_id>', methods=['PATCH'])
 @jwt_required()
 def update_donation_box(donation_box_id):
-    pass
+    # Get the new data from the request
+    new_data = request.get_json()
+
+    if new_data.get('is_donated') is None:
+        return jsonify(result='failure',
+                       message='Invalid Data: No is_donated variable'), 401
+
+    # Get the user id from the token
+    user_id = get_jwt_identity()
+
+    # Query the donation box
+    queried_donation_box = donation_box.DonationBox.query.filter_by(box_id=donation_box_id, user_id=user_id).first()
+
+    if queried_donation_box is None:
+        return jsonify(result='failure',
+                       message=f'No Donation Box found: id {donation_box_id}'), 401
+
+    # Commit the changes to the database and make the response data
+    queried_donation_box.is_donated = new_data['is_donated']
+    db.session.commit()
+
+    return jsonify(result='success',
+                   message='Succeeded Update Donation Box'), 200
 
 
 @app.route('/messages', methods=['POST'])
