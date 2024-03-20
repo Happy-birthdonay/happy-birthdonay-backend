@@ -109,7 +109,19 @@ def sign_up():
 @app.route('/users', methods=['GET'])
 @jwt_required()
 def get_users():
-    pass
+    # Get the user id from the token
+    user_id = get_jwt_identity()
+
+    # Query the user
+    current_user = user.User.query.filter_by(user_id=user_id).first()
+
+    if current_user is None:
+        return jsonify(result='failure',
+                       message='No User found'), 401
+
+    return jsonify(result='success',
+                   message='Succeeded Get User',
+                   data=dict(current_user)), 200
 
 
 @app.route('/donation-boxes', methods=['POST'])
