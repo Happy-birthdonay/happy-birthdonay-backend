@@ -99,11 +99,17 @@ def sign_up():
     if new_data['birthday'] != current_user.birthday:
         current_user.birthday = new_data['birthday']
 
-    # Commit the changes to the database
+    # Commit the changes to the database and make the response data
     db.session.commit()
+    changed_user_data = {
+        'user_id': current_user.user_id,
+        'name': current_user.name,
+        'birthday': current_user.birthday
+    }
 
     return jsonify(result='success',
-                   message='Succeeded Sign Up'), 200
+                   message='Succeeded Sign Up',
+                   data=changed_user_data), 200
 
 
 @app.route('/users', methods=['GET'])
@@ -119,9 +125,15 @@ def get_users():
         return jsonify(result='failure',
                        message='No User found'), 401
 
+    # Make the response data
+    user_data = {
+        'user_id': current_user.user_id,
+        'name': current_user.name,
+        'birthday': current_user.birthday
+    }
     return jsonify(result='success',
                    message='Succeeded Get User',
-                   data=dict(current_user)), 200
+                   data=user_data), 200
 
 
 @app.route('/donation-boxes', methods=['POST'])
