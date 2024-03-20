@@ -39,10 +39,17 @@ def kakao_oauth():
         return jsonify(result='failure',
                        message='Failed Kakao Login: No user information'), 401
 
-    # Add the user to the database
-    # TODO: - Check if the user already exists
+    # Query the user
+    queried_user = user.User.query.filter_by(kakao_id=user_infos['id']).first()
+    if queried_user is not None:
+        return jsonify(result='succeed',
+                       message='Succeeded Kakao Login: User already exists',
+                       data=dict(queried_user)), 200
+
+    # Add the new user to the database
     new_user = user.User(name=user_infos['kakao_account']['name'],
-                         birthday=datetime.strptime(user_infos['kakao_account']['birthday'], '%m%d'))
+                         birthday=datetime.strptime(user_infos['kakao_account']['birthday'], '%m%d'),
+                         kakao_id=user_infos['id'])
     db.session.add(new_user)
     db.session.commit()
     db.session.refresh(new_user)
@@ -58,7 +65,7 @@ def kakao_oauth():
 
     # Make the response
     res = jsonify(result='success',
-                  message='Succeeded Kakao Login',
+                  message='Succeeded Kakao Login: New user added',
                   data=new_user_dict)
 
     # Set the cookies

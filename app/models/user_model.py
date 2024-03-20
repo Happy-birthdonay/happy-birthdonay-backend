@@ -20,13 +20,15 @@ class User(db.Model):
     user_id = db.Column(db.Integer, primary_key=True, autoincrement=True, nullable=False)
     name = db.Column(db.String(50), nullable=False)
     birthday = db.Column(db.DateTime, nullable=False, default=KST)
+    kakao_id = db.Column(db.Integer, nullable=False)
     access_token = db.Column(db.String(500), nullable=False)
     refresh_token = db.Column(db.String(500), nullable=False)
     updated_at = db.Column(db.DateTime, default=KST)
 
-    def __init__(self, name, birthday):
+    def __init__(self, name, birthday, kakao_id):
         self.name = name
         self.birthday = birthday
+        self.kakao_id = kakao_id
         self.updated_at = datetime.datetime.now()
         self.access_token = ''
         self.refresh_token = ''
@@ -35,6 +37,7 @@ class User(db.Model):
         yield 'user_id', self.user_id
         yield 'name', self.name
         yield 'birthday', self.birthday
+        yield 'kakao_id', self.kakao_id
         yield 'access_token', self.access_token
         yield 'refresh_token', self.refresh_token
         yield 'updated_at', self.updated_at
