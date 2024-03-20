@@ -10,6 +10,8 @@ from app.models import user_model as user
 from app.models import donation_box_model as donation_box
 from app.models import message_model as message
 
+from app.utilities.utility import camel_str, camel_dict
+
 # Start of the App
 app = create_app()
 jwt = JWTManager(app)
@@ -64,9 +66,9 @@ def kakao_oauth():
     db.session.refresh(new_user)
 
     # Make tokens and add them to the user
-    new_user_dict = dict(new_user)
-    new_access_token = create_access_token(identity=new_user_dict['user_id'], additional_claims=new_user_dict)
-    new_refresh_token = create_refresh_token(identity=new_user_dict['user_id'], additional_claims=new_user_dict)
+    new_user_dict = camel_dict(dict(new_user))
+    new_access_token = create_access_token(identity=new_user['user_id'], additional_claims=new_user_dict)
+    new_refresh_token = create_refresh_token(identity=new_user['user_id'], additional_claims=new_user_dict)
 
     # TODO: - If the db commit fails, the response should be failed
     new_user.access_token = new_access_token
@@ -119,7 +121,7 @@ def sign_up():
 
     return jsonify(result='success',
                    message='Succeeded Sign Up',
-                   data=changed_user_data), 200
+                   data=camel_dict(changed_user_data)), 200
 
 
 @app.route('/users', methods=['GET'])
@@ -143,7 +145,7 @@ def get_users():
     }
     return jsonify(result='success',
                    message='Succeeded Get User',
-                   data=user_data), 200
+                   data=camel_dict(user_data)), 200
 
 
 @app.route('/donation-boxes', methods=['POST'])
@@ -157,14 +159,15 @@ def create_donation_box():
 
     # Check if the new data is valid
     for key in donation_box.BOX_VALUES:
-        if new_data.get(key) is None:
+        if new_data.get(camel_str(key)) is None:
             return jsonify(result='failure',
-                           message=f'Invalid Data: No {key}'), 401
+                           message=f'Invalid Data: No {camel_str(key)}'), 401
 
     # Add the new donation box to the database
     new_donation_box = donation_box.DonationBox(name=new_data['name'],
                                                 url=new_data['url'],
-                                                description=new_data['description'],
+                                                title=new_data['box_title'],
+                                                description=new_data['box_description'],
                                                 amount=new_data['amount'],
                                                 color=new_data['color'],
                                                 user_id=user_id)
@@ -176,13 +179,11 @@ def create_donation_box():
     # Make the response data
     res_data = {
         'box_id': new_donation_box.box_id,
-        'name': new_donation_box.name,
-        'color': new_donation_box.color
     }
 
     return jsonify(result='success',
                    message='Succeeded Create Donation Box',
-                   data=res_data), 200
+                   data=camel_dict(res_data)), 200
 
 
 @app.route('/donation-boxes', methods=['GET'])
@@ -199,10 +200,10 @@ def get_donation_boxes():
                        message='No Donation Box found'), 401
 
     # Make the response data
-    res_data = [{
-        'box_id': box.box_id,
-        'color': box.color,
-    } for box in donation_boxes]
+    res_data = [camel_dict({
+            'box_id': box.box_id,
+            'color': box.color,
+        }) for box in donation_boxes]
 
     return jsonify(result='success',
                    message='Succeeded Get Donation Boxes',
@@ -231,7 +232,7 @@ def get_donation_box(donation_box_id):
 
     return jsonify(result='success',
                    message='Succeeded Get Donation Box',
-                   data=res_data), 200
+                   data=camel_dict(res_data)), 200
 
 
 @app.route('/donation-boxes/<int:donation_box_id>', methods=['PATCH'])
@@ -240,9 +241,9 @@ def update_donation_box(donation_box_id):
     # Get the new data from the request
     new_data = request.get_json()
 
-    if new_data.get('is_donated') is None:
+    if new_data.get('isDonated') is None:
         return jsonify(result='failure',
-                       message='Invalid Data: No is_donated variable'), 401
+                       message='Invalid Data: No isDonated variable'), 401
 
     # Get the user id from the token
     user_id = get_jwt_identity()

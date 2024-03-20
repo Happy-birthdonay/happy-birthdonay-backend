@@ -3,6 +3,8 @@ from app.models import db
 
 KST = datetime.timezone(datetime.timedelta(hours=9))
 
+MESSAGE_VALUES = ['box_id', 'created_by', 'tag', 'contents']
+
 
 class Message(db.Model):
     """
