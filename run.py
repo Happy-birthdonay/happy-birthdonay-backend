@@ -207,7 +207,7 @@ def get_donation_boxes():
 
     return jsonify(result='success',
                    message='Succeeded Get Donation Boxes',
-                   data=res_data), 200
+                   data={'donationBoxList': res_data}), 200
 
 
 @app.route('/donation-boxes/<int:donation_box_id>', methods=['GET'])
