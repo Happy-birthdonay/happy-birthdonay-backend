@@ -91,7 +91,7 @@ def sign_up():
     # Check if the new data is valid
     if new_data.get('name') is None or new_data.get('birthday') is None:
         return jsonify(result='failure',
-                       message='Invalid Data'), 401
+                       message='Invalid Data: No name or birthday'), 401
 
     # Update the user
     if new_data['name'] != current_user.name:
