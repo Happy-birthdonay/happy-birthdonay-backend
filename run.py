@@ -1,6 +1,7 @@
 from flask import request, jsonify, logging
-from flask_jwt_extended import JWTManager, create_access_token, create_refresh_token, jwt_required, get_jwt_identity
-from datetime import datetime
+from flask_jwt_extended import JWTManager, create_access_token, create_refresh_token, jwt_required, get_jwt_identity, \
+    get_jwt, set_access_cookies, current_user
+from datetime import datetime, timezone, timedelta
 
 from app import create_app, db
 
@@ -21,6 +22,32 @@ logger = logging.create_logger(app)
 
 
 # Routes
+@jwt.user_identity_loader
+def user_identity_lookup(curr_user):
+    return curr_user.user_id
+
+
+@jwt.user_lookup_loader
+def user_lookup_callback(_jwt_header, jwt_data):
+    identity = jwt_data['sub']
+    return user.User.query.filter_by(user_id=identity).one_or_none()
+
+
+@app.after_request
+def refresh_expiring_jwts(response):
+    try:
+        exp_timestamp = get_jwt()["exp"]
+        now = datetime.now(timezone.utc)
+        target_timestamp = datetime.timestamp(now + timedelta(minutes=30))
+        if target_timestamp > exp_timestamp:
+            access_token = create_access_token(identity=get_jwt_identity())
+            set_access_cookies(response, access_token)
+        return response
+    except (RuntimeError, KeyError):
+        # Case where there is not a valid JWT. Just return the original response
+        return response
+
+
 @app.route('/oauth/token', methods=['POST'])
 def kakao_oauth():
     # Get the code from the request
@@ -31,6 +58,7 @@ def kakao_oauth():
     authorization_infos = kakao_oauth_controller.authorization(code)
 
     if authorization_infos.get('access_token') is None:
+        # TODO: - Client should be notified about the failure and return to the kakao login page
         return jsonify(result='failure',
                        message='Failed Kakao Login: No access token'), 401
 
@@ -43,17 +71,35 @@ def kakao_oauth():
                        message='Failed Kakao Login: No user information'), 401
 
     # Query the user
-    queried_user = user.User.query.filter_by(kakao_id=user_infos['id']).first()
+    # queried_user = user.User.query.filter_by(kakao_id=user_infos['id']).first()
+
 
     # If the user already exists, make the response and set the cookies
     if queried_user is not None:
-        res = jsonify(result='succeed',
-                      message='Succeeded Kakao Login: User already exists',
-                      data=dict(queried_user))
+        queried_user_dict = dict(queried_user)
 
         # TODO: - Is access token and refresh token should be updated?
-        res.set_cookie('access_token', queried_user.access_token)
-        res.set_cookie('refresh_token', queried_user.refresh_token)
+        new_access_token = create_access_token(identity=queried_user_dict['user_id'],
+                                               additional_claims=queried_user_dict)
+        new_refresh_token = create_refresh_token(identity=queried_user_dict['user_id'],
+                                                 additional_claims=queried_user_dict)
+
+        queried_user.access_token = new_access_token
+        queried_user.refresh_token = new_refresh_token
+        db.session.commit()
+
+        queried_user_dict = dict(queried_user)
+
+        res = jsonify(result='succeed',
+                      message='Succeeded Kakao Login: User already exists',
+                      data=camel_dict(queried_user_dict))
+
+        res.set_cookie('access_token', new_access_token)
+        res.set_cookie('refresh_token', new_refresh_token)
+
+        logger.debug('Second+ Login')
+        logger.debug(res.data)
+
         return res, 200
 
     # Add the new user to the database
@@ -66,9 +112,9 @@ def kakao_oauth():
     db.session.refresh(new_user)
 
     # Make tokens and add them to the user
-    new_user_dict = camel_dict(dict(new_user))
-    new_access_token = create_access_token(identity=new_user['user_id'], additional_claims=new_user_dict)
-    new_refresh_token = create_refresh_token(identity=new_user['user_id'], additional_claims=new_user_dict)
+    new_user_id = new_user.user_id
+    new_access_token = create_access_token(identity=new_user_id, additional_claims=dict(new_user))
+    new_refresh_token = create_refresh_token(identity=new_user_id, additional_claims=dict(new_user))
 
     # TODO: - If the db commit fails, the response should be failed
     new_user.access_token = new_access_token
@@ -76,13 +122,17 @@ def kakao_oauth():
     db.session.commit()
 
     # Make the response
+    new_user_dict = dict(new_user)
     res = jsonify(result='success',
                   message='Succeeded Kakao Login: New user added',
-                  data=new_user_dict)
+                  data=camel_dict(new_user_dict))
 
     # Set the cookies
     res.set_cookie('access_token', new_access_token)
     res.set_cookie('refresh_token', new_refresh_token)
+
+    logger.debug('First Login')
+    logger.debug(res.data)
 
     return res, 200
 
@@ -201,9 +251,9 @@ def get_donation_boxes():
 
     # Make the response data
     res_data = [camel_dict({
-            'box_id': box.box_id,
-            'color': box.color,
-        }) for box in donation_boxes]
+        'box_id': box.box_id,
+        'color': box.color,
+    }) for box in donation_boxes]
 
     return jsonify(result='success',
                    message='Succeeded Get Donation Boxes',
