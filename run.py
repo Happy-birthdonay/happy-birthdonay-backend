@@ -319,15 +319,57 @@ def update_donation_box(donation_box_id):
 
 
 @app.route('/messages', methods=['POST'])
-@jwt_required()
 def create_message():
-    pass
+    # Get the new data from the request
+    new_data = request.get_json()
+    new_message = message.Message()
+
+    for key in message.MESSAGE_VALUES:
+        if new_data.get(camel_str(key)) is None:
+            return jsonify(result='failure',
+                           message=f'Invalid Data: No {camel_str(key)}'), 401
+        else:
+            setattr(new_message, key, new_data[camel_str(key)])
+
+    db.session.add(new_message)
+    db.session.commit()
+
+    # TODO: - If the db commit fails, the response should be failed
+    return jsonify(result='success',
+                   message='Succeeded Create Message'), 200
 
 
 @app.route('/messages', methods=['GET'])
 @jwt_required()
 def get_messages():
-    pass
+    # Get the data from the request
+    new_data = request.get_json()
+    box_id = new_data.get('box_id')
+
+    # Get the user id from the token
+    user_id = get_jwt_identity()
+
+    # Check if the box_id is valid
+    if box_id is None:
+        return jsonify(result='failure',
+                       message='Invalid Data: No boxId'), 401
+
+    # Check if the box_id is matched with the user_id
+    if box_id is not None:
+        curr_box = donation_box.DonationBox.query.filter_by(box_id=box_id).first()
+        if curr_box.user_id != user_id:
+            return jsonify(result='failure',
+                           message='Invalid Data: BoxId and userId are not matched'), 401
+
+    # Query the messages
+    queried_messages = message.Message.query.filter_by(box_id=box_id).all()
+
+    # Make the response data
+    res_data = [camel_dict(msg) for msg in queried_messages]
+
+    return jsonify(result='success',
+                   message='Succeeded Get Messages',
+                   data={'messageList': res_data}), 200
 
 
 @app.route('/certifications', methods=['POST'])

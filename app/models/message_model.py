@@ -26,11 +26,17 @@ class Message(db.Model):
     content = db.Column(db.String(600), nullable=False)
     created_at = db.Column(db.DateTime, default=KST)
 
-    def __init__(self, box_id, created_by, tag, content):
-        self.box_id = box_id
-        self.created_by = created_by
-        self.tag = tag
-        self.content = content
+    # def __init__(self, box_id, created_by, tag, content):
+    #     self.box_id = box_id
+    #     self.created_by = created_by
+    #     self.tag = tag
+    #     self.content = content
+    #     self.created_at = datetime.datetime.now()
+
+    def __init__(self, **kwargs):
+        for key in MESSAGE_VALUES:
+            if key in kwargs:
+                setattr(self, key, kwargs[key])
         self.created_at = datetime.datetime.now()
 
     def __iter__(self):
