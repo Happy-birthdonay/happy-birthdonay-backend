@@ -31,8 +31,6 @@ class User(db.Model):
         self.birthday = birthday
         self.kakao_id = kakao_id
         self.updated_at = datetime.datetime.now()
-        self.access_token = ''
-        self.refresh_token = ''
 
     def __iter__(self):
         yield 'user_id', self.user_id

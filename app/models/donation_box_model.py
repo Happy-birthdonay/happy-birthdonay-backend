@@ -48,15 +48,22 @@ class DonationBox(db.Model):
     #     self.user_id = user_id
     #     self.updated_at = datetime.datetime.now()
 
-    def __init__(self, user_id):
-        self.name = ''
-        self.url = ''
-        self.box_title = ''
-        self.box_description = ''
-        self.amount = 0
-        self.color = ''
+    def __init__(self, user_id, **kwargs):
+        for key in BOX_VALUES:
+            if key in kwargs:
+                setattr(self, key, kwargs[key])
         self.user_id = user_id
         self.updated_at = datetime.datetime.now()
+
+    # def __init__(self, user_id):
+    #     self.name = ''
+    #     self.url = ''
+    #     self.box_title = ''
+    #     self.box_description = ''
+    #     self.amount = 0
+    #     self.color = ''
+    #     self.user_id = user_id
+    #     self.updated_at = datetime.datetime.now()
 
     def __iter__(self):
         yield 'box_id', self.box_id
