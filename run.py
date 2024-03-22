@@ -48,6 +48,16 @@ def refresh_expiring_jwts(response):
         return response
 
 
+@app.route('/token')
+def check_token():
+    pass
+
+
+@app.route('/refresh')
+def refresh_token():
+    pass
+
+
 @app.route('/oauth/token', methods=['POST'])
 def kakao_oauth():
     # Get the code from the request
@@ -60,7 +70,7 @@ def kakao_oauth():
     if authorization_infos.get('access_token') is None:
         # TODO: - Client should be notified about the failure and return to the kakao login page
         return jsonify(result='failure',
-                       message='Failed Kakao Login: No access token'), 401
+                       message='Failed Kakao Login: No access token. Check the code again.'), 401
 
     # Get user info using kakao access token
     access_token = authorization_infos['access_token']
@@ -68,11 +78,10 @@ def kakao_oauth():
 
     if user_infos is None:
         return jsonify(result='failure',
-                       message='Failed Kakao Login: No user information'), 401
+                       message='Failed Kakao Login: No user information.'), 401
 
     # Query the user
-    # queried_user = user.User.query.filter_by(kakao_id=user_infos['id']).first()
-
+    queried_user = user.User.query.filter_by(kakao_id=user_infos['id']).first()
 
     # If the user already exists, make the response and set the cookies
     if queried_user is not None:
@@ -147,7 +156,7 @@ def sign_up():
     user_id = get_jwt_identity()
 
     # Query the user
-    current_user = user.User.query.filter_by(user_id=user_id).first()
+    curr_user = user.User.query.filter_by(user_id=user_id).first()
 
     # Check if the new data is valid
     if new_data.get('name') is None or new_data.get('birthday') is None:
@@ -155,18 +164,18 @@ def sign_up():
                        message='Invalid Data: No name or birthday'), 401
 
     # Update the user
-    if new_data['name'] != current_user.name:
-        current_user.name = new_data['name']
-    if new_data['birthday'] != current_user.birthday:
-        current_user.birthday = new_data['birthday']
+    if new_data['name'] != curr_user.name:
+        curr_user.name = new_data['name']
+    if new_data['birthday'] != curr_user.birthday:
+        curr_user.birthday = new_data['birthday']
 
     # Commit the changes to the database and make the response data
     # TODO: - If the db commit fails, the response should be failed
     db.session.commit()
     changed_user_data = {
-        'user_id': current_user.user_id,
-        'name': current_user.name,
-        'birthday': current_user.birthday
+        'user_id': curr_user.user_id,
+        'name': curr_user.name,
+        'birthday': curr_user.birthday
     }
 
     return jsonify(result='success',
@@ -181,17 +190,17 @@ def get_users():
     user_id = get_jwt_identity()
 
     # Query the user
-    current_user = user.User.query.filter_by(user_id=user_id).first()
+    curr_user = user.User.query.filter_by(user_id=user_id).first()
 
-    if current_user is None:
+    if curr_user is None:
         return jsonify(result='failure',
                        message='No User found'), 401
 
     # Make the response data
     user_data = {
-        'user_id': current_user.user_id,
-        'name': current_user.name,
-        'birthday': current_user.birthday
+        'user_id': curr_user.user_id,
+        'name': curr_user.name,
+        'birthday': curr_user.birthday
     }
     return jsonify(result='success',
                    message='Succeeded Get User',
@@ -206,21 +215,17 @@ def create_donation_box():
 
     # Get the user id from the token
     user_id = get_jwt_identity()
+    new_donation_box = donation_box.DonationBox(user_id=user_id)
 
     # Check if the new data is valid
     for key in donation_box.BOX_VALUES:
         if new_data.get(camel_str(key)) is None:
             return jsonify(result='failure',
                            message=f'Invalid Data: No {camel_str(key)}'), 401
+        else:
+            setattr(new_donation_box, key, new_data[camel_str(key)])
 
     # Add the new donation box to the database
-    new_donation_box = donation_box.DonationBox(name=new_data['name'],
-                                                url=new_data['url'],
-                                                title=new_data['box_title'],
-                                                description=new_data['box_description'],
-                                                amount=new_data['amount'],
-                                                color=new_data['color'],
-                                                user_id=user_id)
     db.session.add(new_donation_box)
     db.session.commit()
     db.session.refresh(new_donation_box)

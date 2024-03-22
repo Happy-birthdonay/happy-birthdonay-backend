@@ -38,13 +38,23 @@ class DonationBox(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.user_id'), nullable=False)
     updated_at = db.Column(db.DateTime, default=KST, onupdate=KST)
 
-    def __init__(self, name, url, title, description, amount, color, user_id):
-        self.name = name
-        self.url = url
-        self.box_title = title
-        self.box_description = description
-        self.amount = amount
-        self.color = color
+    # def __init__(self, name, url, title, description, amount, color, user_id):
+    #     self.name = name
+    #     self.url = url
+    #     self.box_title = title
+    #     self.box_description = description
+    #     self.amount = amount
+    #     self.color = color
+    #     self.user_id = user_id
+    #     self.updated_at = datetime.datetime.now()
+
+    def __init__(self, user_id):
+        self.name = ''
+        self.url = ''
+        self.box_title = ''
+        self.box_description = ''
+        self.amount = 0
+        self.color = ''
         self.user_id = user_id
         self.updated_at = datetime.datetime.now()
 
