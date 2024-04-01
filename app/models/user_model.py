@@ -1,7 +1,7 @@
 import datetime
 from app.models import db
 
-KST = datetime.timezone(datetime.timedelta(hours=9))
+# KST = datetime.timezone(datetime.timedelta(hours=9))
 
 
 class User(db.Model):
@@ -24,7 +24,7 @@ class User(db.Model):
     kakao_id = db.Column(db.Integer, nullable=False)
     access_token = db.Column(db.String(500), nullable=False)
     refresh_token = db.Column(db.String(500), nullable=False)
-    updated_at = db.Column(db.DateTime, default=KST)
+    updated_at = db.Column(db.DateTime)
 
     def __init__(self, name, birthday, kakao_id):
         self.name = name

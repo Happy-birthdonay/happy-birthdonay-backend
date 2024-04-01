@@ -1,7 +1,7 @@
 import datetime
 from app.models import db
 
-KST = datetime.timezone(datetime.timedelta(hours=9))
+# KST = datetime.timezone(datetime.timedelta(hours=9))
 
 MESSAGE_VALUES = ['box_id', 'created_by', 'tag', 'contents']
 
@@ -24,7 +24,7 @@ class Message(db.Model):
     created_by = db.Column(db.String(20), nullable=False)
     tag = db.Column(db.String(45), nullable=False)
     content = db.Column(db.String(600), nullable=False)
-    created_at = db.Column(db.DateTime, default=KST)
+    created_at = db.Column(db.DateTime)
 
     # def __init__(self, box_id, created_by, tag, content):
     #     self.box_id = box_id

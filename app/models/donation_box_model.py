@@ -1,7 +1,7 @@
 import datetime
 from app.models import db
 
-KST = datetime.timezone(datetime.timedelta(hours=9))
+# KST = datetime.timezone(datetime.timedelta(hours=9))
 
 BOX_VALUES = ['name', 'url', 'box_title', 'box_description', 'amount', 'color']
 
@@ -34,9 +34,9 @@ class DonationBox(db.Model):
     color = db.Column(db.String(45), nullable=False)
     is_donated = db.Column(db.Boolean, nullable=False, default=False)
     cert_img_url = db.Column(db.String(250), nullable=True)
-    cert_created_at = db.Column(db.DateTime, nullable=True, default=KST)
+    cert_created_at = db.Column(db.DateTime, nullable=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.user_id'), nullable=False)
-    updated_at = db.Column(db.DateTime, default=KST, onupdate=KST)
+    updated_at = db.Column(db.DateTime)
 
     # def __init__(self, name, url, title, description, amount, color, user_id):
     #     self.name = name
