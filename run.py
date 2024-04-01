@@ -1,4 +1,6 @@
-from flask import request, jsonify, logging
+import json
+
+from flask import request, jsonify, logging, make_response
 from flask_jwt_extended import JWTManager, create_access_token, create_refresh_token, jwt_required, get_jwt_identity, \
     get_jwt, set_access_cookies, current_user
 from datetime import datetime, timezone, timedelta
@@ -11,7 +13,7 @@ from app.models import user_model as user
 from app.models import donation_box_model as donation_box
 from app.models import message_model as message
 
-from app.utilities.utility import camel_str, camel_dict
+from app.utilities.utility import camel_str, camel_dict, json_serial_timestamp
 
 # Start of the App
 app = create_app()
@@ -70,7 +72,7 @@ def kakao_oauth():
     if authorization_infos.get('access_token') is None:
         # TODO: - Client should be notified about the failure and return to the kakao login page
         return jsonify(result='failure',
-                       message='Failed Kakao Login: No access token. Check the code again.'), 401
+                       message='Failed Kakao Login: No access token. Check the kakao code again.'), 401
 
     # Get user info using kakao access token
     access_token = authorization_infos['access_token']
@@ -99,15 +101,15 @@ def kakao_oauth():
 
         queried_user_dict = dict(queried_user)
 
-        res = jsonify(result='succeed',
-                      message='Succeeded Kakao Login: User already exists',
-                      data=camel_dict(queried_user_dict))
+        result = json.dumps({
+            'result': 'succeed',
+            'message': 'Succeeded Kakao Login: User already exists',
+            'data': camel_dict(queried_user_dict)
+        }, ensure_ascii=False, indent=4, default=json_serial_timestamp)
+        res = make_response(result)
 
         res.set_cookie('access_token', new_access_token)
         res.set_cookie('refresh_token', new_refresh_token)
-
-        logger.debug('Second+ Login')
-        logger.debug(res.data)
 
         return res, 200
 
@@ -122,6 +124,7 @@ def kakao_oauth():
 
     # Make tokens and add them to the user
     new_user_id = new_user.user_id
+    # TODO: - Why are tokens same value?
     new_access_token = create_access_token(identity=new_user_id, additional_claims=dict(new_user))
     new_refresh_token = create_refresh_token(identity=new_user_id, additional_claims=dict(new_user))
 
@@ -132,16 +135,16 @@ def kakao_oauth():
 
     # Make the response
     new_user_dict = dict(new_user)
-    res = jsonify(result='success',
-                  message='Succeeded Kakao Login: New user added',
-                  data=camel_dict(new_user_dict))
+    result = json.dumps({
+        'result': 'succeed',
+        'message': 'Succeeded Kakao Login: New user added',
+        'data': camel_dict(new_user_dict)
+    }, ensure_ascii=False, indent=4, default=json_serial_timestamp)
+    res = make_response(result)
 
     # Set the cookies
     res.set_cookie('access_token', new_access_token)
     res.set_cookie('refresh_token', new_refresh_token)
-
-    logger.debug('First Login')
-    logger.debug(res.data)
 
     return res, 200
 
@@ -178,9 +181,14 @@ def sign_up():
         'birthday': curr_user.birthday
     }
 
-    return jsonify(result='success',
-                   message='Succeeded Sign Up',
-                   data=camel_dict(changed_user_data)), 200
+    result = json.dumps({
+        'result': 'succeed',
+        'message': 'Succeeded Sign up',
+        'data': camel_dict(changed_user_data)
+    }, ensure_ascii=False, indent=4, default=json_serial_timestamp)
+    res = make_response(result)
+
+    return res, 200
 
 
 @app.route('/users', methods=['GET'])
@@ -202,9 +210,14 @@ def get_users():
         'name': curr_user.name,
         'birthday': curr_user.birthday
     }
-    return jsonify(result='success',
-                   message='Succeeded Get User',
-                   data=camel_dict(user_data)), 200
+    result = json.dumps({
+        'result': 'succeed',
+        'message': 'Succeeded Get user',
+        'data': camel_dict(user_data)
+    }, ensure_ascii=False, indent=4, default=json_serial_timestamp)
+    res = make_response(result)
+
+    return res, 200
 
 
 @app.route('/donation-boxes', methods=['POST'])
@@ -236,9 +249,14 @@ def create_donation_box():
         'box_id': new_donation_box.box_id,
     }
 
-    return jsonify(result='success',
-                   message='Succeeded Create Donation Box',
-                   data=camel_dict(res_data)), 200
+    result = json.dumps({
+        'result': 'succeed',
+        'message': 'Succeeded to create donation box',
+        'data': camel_dict(res_data)
+    }, ensure_ascii=False, indent=4, default=json_serial_timestamp)
+    res = make_response(result)
+
+    return res, 200
 
 
 @app.route('/donation-boxes', methods=['GET'])
@@ -260,9 +278,14 @@ def get_donation_boxes():
         'color': box.color,
     }) for box in donation_boxes]
 
-    return jsonify(result='success',
-                   message='Succeeded Get Donation Boxes',
-                   data={'donationBoxList': res_data}), 200
+    result = json.dumps({
+        'result': 'succeed',
+        'message': 'Succeeded to get donation boxes',
+        'data': camel_dict(res_data)
+    }, ensure_ascii=False, indent=4, default=json_serial_timestamp)
+    res = make_response(result)
+
+    return res, 200
 
 
 @app.route('/donation-boxes/<int:donation_box_id>', methods=['GET'])
@@ -285,9 +308,14 @@ def get_donation_box(donation_box_id):
     res_data.update({'open_date': f'{datetime.date.today().year}{open_date_str}'})
     res_data.update({'message_count': queried_messages})
 
-    return jsonify(result='success',
-                   message='Succeeded Get Donation Box',
-                   data=camel_dict(res_data)), 200
+    result = json.dumps({
+        'result': 'succeed',
+        'message': 'Succeeded to get donation box',
+        'data': camel_dict(res_data)
+    }, ensure_ascii=False, indent=4, default=json_serial_timestamp)
+    res = make_response(result)
+
+    return res, 200
 
 
 @app.route('/donation-boxes/<int:donation_box_id>', methods=['PATCH'])
@@ -367,9 +395,14 @@ def get_messages():
     # Make the response data
     res_data = [camel_dict(msg) for msg in queried_messages]
 
-    return jsonify(result='success',
-                   message='Succeeded Get Messages',
-                   data={'messageList': res_data}), 200
+    result = json.dumps({
+        'result': 'succeed',
+        'message': 'Succeeded to get messages',
+        'data': camel_dict(res_data)
+    }, ensure_ascii=False, indent=4, default=json_serial_timestamp)
+    res = make_response(result)
+
+    return res, 200
 
 
 @app.route('/certifications', methods=['POST'])
