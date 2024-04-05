@@ -24,13 +24,13 @@ class User(db.Model):
     kakao_id = db.Column(db.Integer, nullable=False)
     access_token = db.Column(db.String(500), nullable=False)
     refresh_token = db.Column(db.String(500), nullable=False)
-    updated_at = db.Column(db.DateTime)
+    updated_at = db.Column(db.DateTime, nullable=True)
 
     def __init__(self, name, birthday, kakao_id):
         self.name = name
         self.birthday = birthday
         self.kakao_id = kakao_id
-        self.updated_at = datetime.datetime.now()
+        # self.updated_at = datetime.datetime.now()
         self.access_token = ''
         self.refresh_token = ''
 

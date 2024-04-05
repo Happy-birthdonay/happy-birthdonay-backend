@@ -20,7 +20,7 @@ class DonationBox(db.Model):
     - cert_img_url: 상자 인증 이미지 URL, VARCHAR(500)
     - cert_created_at: 상자 인증 시간, DATETIME
     - user_id: 사용자 아이디, INT, FK
-    - updated_at: 업데이트 시간, DATETIME
+    - created_at: 생성 시간, DATETIME
     """
 
     __tablename__ = 'donation_box'
@@ -36,34 +36,14 @@ class DonationBox(db.Model):
     cert_img_url = db.Column(db.String(250), nullable=True)
     cert_created_at = db.Column(db.DateTime, nullable=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.user_id'), nullable=False)
-    updated_at = db.Column(db.DateTime)
-
-    # def __init__(self, name, url, title, description, amount, color, user_id):
-    #     self.name = name
-    #     self.url = url
-    #     self.box_title = title
-    #     self.box_description = description
-    #     self.amount = amount
-    #     self.color = color
-    #     self.user_id = user_id
-    #     self.updated_at = datetime.datetime.now()
+    created_at = db.Column(db.DateTime, nullable=True)
 
     def __init__(self, user_id, **kwargs):
         for key in BOX_VALUES:
             if key in kwargs:
                 setattr(self, key, kwargs[key])
         self.user_id = user_id
-        self.updated_at = datetime.datetime.now()
-
-    # def __init__(self, user_id):
-    #     self.name = ''
-    #     self.url = ''
-    #     self.box_title = ''
-    #     self.box_description = ''
-    #     self.amount = 0
-    #     self.color = ''
-    #     self.user_id = user_id
-    #     self.updated_at = datetime.datetime.now()
+        self.created_at = datetime.datetime.now()
 
     def __iter__(self):
         yield 'box_id', self.box_id
@@ -77,4 +57,4 @@ class DonationBox(db.Model):
         yield 'cert_img_url', self.cert_img_url
         yield 'cert_created_at', self.cert_created_at
         yield 'user_id', self.user_id
-        yield 'updated_at', self.updated_at
+        yield 'created_at', self.updated_at

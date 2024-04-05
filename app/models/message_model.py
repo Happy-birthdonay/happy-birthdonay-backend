@@ -24,7 +24,7 @@ class Message(db.Model):
     created_by = db.Column(db.String(20), nullable=False)
     tag = db.Column(db.String(45), nullable=False)
     content = db.Column(db.String(600), nullable=False)
-    created_at = db.Column(db.DateTime)
+    created_at = db.Column(db.DateTime, nullable=True)
 
     # def __init__(self, box_id, created_by, tag, content):
     #     self.box_id = box_id

@@ -14,6 +14,7 @@ def camel_dict(d):
 
 
 def json_serial_timestamp(obj):
-    if isinstance(obj, (datetime.datetime, datetime.date)):
-        return obj.isoformat()
+    if isinstance(obj, datetime.datetime):
+        return obj.strftime('%Y-%m-%d %H:%M:%S')
+        # return obj.strftime('%Y%m%d')
     raise TypeError("Type %s not serializable" % type(obj))
