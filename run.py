@@ -226,8 +226,6 @@ def create_donation_box():
     # Get the new data from the request
     new_data = request.get_json()
 
-    logger.debug('create donation box')
-
     # Get the user id from the token
     user_id = get_jwt_identity()
     new_donation_box = donation_box.DonationBox(user_id=user_id)
