@@ -340,8 +340,7 @@ def create_message():
 @jwt_required()
 def get_messages():
     # Get the data from the request
-    new_data = request.get_json()
-    box_id = new_data.get('boxId')
+    box_id = request.args.get('boxId', type=int)
 
     # Get the user id from the token
     user_id = get_jwt_identity()
