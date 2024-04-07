@@ -341,7 +341,7 @@ def create_message():
 def get_messages():
     # Get the data from the request
     new_data = request.get_json()
-    box_id = new_data.get('box_id')
+    box_id = new_data.get('boxId')
 
     # Get the user id from the token
     user_id = get_jwt_identity()
