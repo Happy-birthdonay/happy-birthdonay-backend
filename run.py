@@ -62,15 +62,14 @@ def kakao_oauth():
     if queried_user is not None:
         queried_user_dict = dict(queried_user)
 
-        # TODO: - Is access token and refresh token should be updated?
+        # TODO: - Are access token and refresh token should be updated?
         new_access_token = create_access_token(identity=queried_user_dict['user_id'],
-                                               additional_claims=queried_user_dict)
+                                               additional_claims={'kakao_id': user_infos['id']})
         new_refresh_token = create_refresh_token(identity=queried_user_dict['user_id'],
-                                                 additional_claims=queried_user_dict)
+                                                 additional_claims={'kakao_id': user_infos['id']})
 
         queried_user.access_token = new_access_token
         queried_user.refresh_token = new_refresh_token
-        db.session.commit()
 
         queried_user_dict = dict(queried_user)
 
@@ -97,14 +96,11 @@ def kakao_oauth():
 
     # Make tokens and add them to the user
     new_user_id = new_user.user_id
-    # TODO: - Why are tokens same value?
-    new_access_token = create_access_token(identity=new_user_id, additional_claims=dict(new_user))
-    new_refresh_token = create_refresh_token(identity=new_user_id, additional_claims=dict(new_user))
+    new_access_token = create_access_token(identity=new_user_id, additional_claims={'kakao_id': user_infos['id']})
+    new_refresh_token = create_refresh_token(identity=new_user_id, additional_claims={'kakao_id': user_infos['id']})
 
-    # TODO: - If the db commit fails, the response should be failed
     new_user.access_token = new_access_token
     new_user.refresh_token = new_refresh_token
-    db.session.commit()
 
     # Make the response
     new_user_dict = dict(new_user)
