@@ -1,9 +1,8 @@
 import json
 
 from flask import request, jsonify, logging, make_response
-from flask_jwt_extended import JWTManager, create_access_token, create_refresh_token, jwt_required, get_jwt_identity, \
-    get_jwt, set_access_cookies, current_user
-from datetime import datetime, timezone, timedelta
+from flask_jwt_extended import JWTManager, create_access_token, create_refresh_token, jwt_required, get_jwt_identity
+from datetime import datetime, timedelta
 
 from app import create_app, db
 
@@ -361,12 +360,12 @@ def get_messages():
     queried_messages = message.Message.query.filter_by(box_id=box_id).all()
 
     # Make the response data
-    res_data = [camel_dict(msg) for msg in queried_messages]
+    res_data = [camel_dict(dict(msg)) for msg in queried_messages]
 
     result = json.dumps({
         'result': 'succeed',
         'message': 'Succeeded to get messages',
-        'data': camel_dict(res_data)
+        'data': res_data
     }, ensure_ascii=False, indent=4, default=json_serial_timestamp)
     res = make_response(result)
 
