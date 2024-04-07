@@ -22,14 +22,23 @@ jwt = JWTManager(app)
 logger = logging.create_logger(app)
 
 
-@app.route('/token')
-def check_token():
-    pass
-
-
+# Routes
 @app.route('/refresh')
-def refresh_token():
-    pass
+@jwt_required(refresh=True)
+def refresh():
+    identity = get_jwt_identity()
+    access_token = create_access_token(identity=identity)
+    result = json.dumps({
+        'result': 'succeed',
+        'message': 'Succeeded Kakao Login: User already exists',
+        'data': {
+            'access_token': access_token
+        }
+    }, ensure_ascii=False, indent=4, default=json_serial_timestamp)
+    res = make_response(result)
+    res.set_cookie('access_token', access_token)
+
+    return res, 200
 
 
 @app.route('/oauth/token', methods=['POST'])
@@ -61,27 +70,12 @@ def kakao_oauth():
     if queried_user is not None:
         queried_user_dict = dict(queried_user)
 
-        # TODO: - Are access token and refresh token should be updated?
-        new_access_token = create_access_token(identity=queried_user_dict['user_id'],
-                                               additional_claims={'kakao_id': user_infos['id']})
-        new_refresh_token = create_refresh_token(identity=queried_user_dict['user_id'],
-                                                 additional_claims={'kakao_id': user_infos['id']})
-
-        queried_user.access_token = new_access_token
-        queried_user.refresh_token = new_refresh_token
-
-        queried_user_dict = dict(queried_user)
-
         result = json.dumps({
             'result': 'succeed',
             'message': 'Succeeded Kakao Login: User already exists',
             'data': camel_dict(queried_user_dict)
         }, ensure_ascii=False, indent=4, default=json_serial_timestamp)
         res = make_response(result)
-
-        res.set_cookie('access_token', new_access_token)
-        res.set_cookie('refresh_token', new_refresh_token)
-
         return res, 200
 
     # Add the new user to the database
@@ -95,8 +89,10 @@ def kakao_oauth():
 
     # Make tokens and add them to the user
     new_user_id = new_user.user_id
-    new_access_token = create_access_token(identity=new_user_id, additional_claims={'kakao_id': user_infos['id']})
-    new_refresh_token = create_refresh_token(identity=new_user_id, additional_claims={'kakao_id': user_infos['id']})
+    new_access_token = create_access_token(identity=new_user_id,
+                                           additional_claims={'kakao_id': user_infos['id']})
+    new_refresh_token = create_refresh_token(identity=new_user_id,
+                                             additional_claims={'kakao_id': user_infos['id']})
 
     new_user.access_token = new_access_token
     new_user.refresh_token = new_refresh_token
