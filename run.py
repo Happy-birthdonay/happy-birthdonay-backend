@@ -226,6 +226,8 @@ def create_donation_box():
     # Get the new data from the request
     new_data = request.get_json()
 
+    logger.debug('create donation box')
+
     # Get the user id from the token
     user_id = get_jwt_identity()
     new_donation_box = donation_box.DonationBox(user_id=user_id)
@@ -301,7 +303,7 @@ def get_donation_box(donation_box_id):
 
     if queried_donation_box is None:
         return jsonify(result='failure',
-                       message='No Donation Box found'), 401
+                       message='No Donation Box found'), 403
 
     # Make the response data
     res_data = dict(queried_donation_box)

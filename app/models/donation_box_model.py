@@ -57,4 +57,4 @@ class DonationBox(db.Model):
         yield 'cert_img_url', self.cert_img_url
         yield 'cert_created_at', self.cert_created_at
         yield 'user_id', self.user_id
-        yield 'created_at', self.updated_at
+        yield 'created_at', self.created_at
