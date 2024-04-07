@@ -13,24 +13,24 @@ class Message(db.Model):
     - box_id: 박스 아이디, INT, FK
     - created_by: 메시지 보낸 사람, VARCHAR(20)
     - tag: 태그 - 메시지 테마, VARCHAR(45)
-    - content: 메시지 내용, VARCHAR(600)
+    - contents: 메시지 내용, VARCHAR(600)
     - created_at: 메시지 생성 시간, DATETIME
     """
 
     __tablename__ = 'message'
 
     message_id = db.Column(db.Integer, primary_key=True, autoincrement=True, nullable=False)
-    box_id = db.Column(db.Integer, db.ForeignKey('donation_box.id'), nullable=False)
+    box_id = db.Column(db.Integer, db.ForeignKey('donation_box.box_id'), nullable=False)
     created_by = db.Column(db.String(20), nullable=False)
     tag = db.Column(db.String(45), nullable=False)
-    content = db.Column(db.String(600), nullable=False)
+    contents = db.Column(db.String(600), nullable=False)
     created_at = db.Column(db.DateTime, nullable=True)
 
-    # def __init__(self, box_id, created_by, tag, content):
+    # def __init__(self, box_id, created_by, tag, contents):
     #     self.box_id = box_id
     #     self.created_by = created_by
     #     self.tag = tag
-    #     self.content = content
+    #     self.contents = contents
     #     self.created_at = datetime.datetime.now()
 
     def __init__(self, **kwargs):
@@ -44,5 +44,5 @@ class Message(db.Model):
         yield 'box_id', self.box_id
         yield 'created_by', self.created_by
         yield 'tag', self.tag
-        yield 'content', self.content
+        yield 'contents', self.contents
         yield 'created_at', self.created_at
