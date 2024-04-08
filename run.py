@@ -252,6 +252,28 @@ def get_donation_boxes():
     return res, 200
 
 
+@app.route('/donation-boxes/<int:donation_box_id>/guest', methods=['GET'])
+def get_donation_box_for_guest(donation_box_id):
+    queried_donation_box = donation_box.DonationBox.query.filter_by(box_id=donation_box_id).first()
+    queried_messages_count = message.Message.query.filter_by(box_id=donation_box_id).count()
+
+    if queried_donation_box is None:
+        return jsonify(result='failure',
+                       message='No Donation Box found'), 403
+
+    res_data = dict(queried_donation_box)
+    res_data.update({'message_count': queried_messages_count})
+
+    result = json.dumps({
+        'result': 'succeed',
+        'message': 'Succeeded to get donation box',
+        'data': camel_dict(res_data)
+    }, ensure_ascii=False, indent=4, default=json_serial_timestamp)
+    res = make_response(result)
+
+    return res, 200
+
+
 @app.route('/donation-boxes/<int:donation_box_id>', methods=['GET'])
 @jwt_required()
 def get_donation_box(donation_box_id):
