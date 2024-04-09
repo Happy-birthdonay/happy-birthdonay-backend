@@ -245,7 +245,7 @@ def get_donation_boxes():
     result = json.dumps({
         'result': 'succeed',
         'message': 'Succeeded to get donation boxes',
-        'data': camel_dict(res_data)
+        'data': res_data
     }, ensure_ascii=False, indent=4, default=json_serial_timestamp)
     res = make_response(result)
 
