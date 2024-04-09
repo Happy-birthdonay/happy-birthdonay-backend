@@ -325,7 +325,7 @@ def update_donation_box(donation_box_id):
                        message=f'No Donation Box found: id {donation_box_id}'), 401
 
     # Commit the changes to the database and make the response data
-    queried_donation_box.is_donated = new_data['is_donated']
+    queried_donation_box.is_donated = new_data['isDonated']
     db.session.commit()
 
     return jsonify(result='success',
