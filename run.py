@@ -70,12 +70,21 @@ def kakao_oauth():
     if queried_user is not None:
         queried_user_dict = dict(queried_user)
 
+        new_access_token = create_access_token(identity=queried_user_dict['user_id'],
+                                               additional_claims={'kakao_id': queried_user_dict['kakao_id']})
+        new_refresh_token = create_refresh_token(identity=queried_user_dict['user_id'],
+                                                 additional_claims={'kakao_id': queried_user_dict['kakao_id']})
+
         result = json.dumps({
             'result': 'succeed',
             'message': 'Succeeded Kakao Login: User already exists',
             'data': camel_dict(queried_user_dict)
         }, ensure_ascii=False, indent=4, default=json_serial_timestamp)
+
         res = make_response(result)
+        res.set_cookie('access_token', new_access_token)
+        res.set_cookie('refresh_token', new_refresh_token)
+
         return res, 200
 
     # Add the new user to the database
