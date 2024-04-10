@@ -18,7 +18,7 @@ class DonationBox(db.Model):
     - color: 상자 색상, VARCHAR(45)
     - is_donated: 상자 기부 여부, BOOLEAN
     - cert_img_url: 상자 인증 이미지 URL, VARCHAR(500)
-    - cert_created_at: 상자 인증 시간, DATETIME
+    - cert_created_at: 상자 인증 시간, VARCHAR(12)
     - user_id: 사용자 아이디, INT, FK
     - created_at: 생성 시간, DATETIME
     """
@@ -34,7 +34,7 @@ class DonationBox(db.Model):
     color = db.Column(db.String(45), nullable=False)
     is_donated = db.Column(db.Boolean, nullable=False, default=False)
     cert_img_url = db.Column(db.String(250), nullable=True)
-    cert_created_at = db.Column(db.DateTime, nullable=True)
+    cert_created_at = db.Column(db.String(12), nullable=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.user_id'), nullable=False)
     created_at = db.Column(db.DateTime, nullable=True)
 
