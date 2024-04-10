@@ -377,11 +377,11 @@ def get_messages():
                        message='Invalid Data: No boxId'), 401
 
     # Check if the box_id is matched with the user_id
-    if box_id is not None:
-        curr_box = donation_box.DonationBox.query.filter_by(box_id=box_id).first()
-        if curr_box.user_id != user_id:
-            return jsonify(result='failure',
-                           message='Invalid Data: BoxId and userId are not matched'), 401
+    curr_box = donation_box.DonationBox.query.filter_by(user_id=user_id, box_id=box_id).first()
+
+    if curr_box is None:
+        return jsonify(result='failure',
+                       message='Invalid Data: BoxId and userId are not matched'), 401
 
     # Query the messages
     queried_messages = message.Message.query.filter_by(box_id=box_id).all()
@@ -399,16 +399,74 @@ def get_messages():
     return res, 200
 
 
-@app.route('/certifications', methods=['POST'])
+@app.route('/certifications', methods=['PATCH'])
 @jwt_required()
-def create_certification():
-    pass
+def save_certification_image():
+    new_data = request.get_json()
+
+    if new_data.get('boxId') is None or new_data.get('imageUrl') is None:
+        return jsonify(result='failure',
+                       message='Invalid Data: No boxId or imageUrl found'), 401
+
+    user_id = get_jwt_identity()
+
+    queried_box = donation_box.DonationBox.query.filter_by(user_id=user_id, box_id=new_data['boxId']).first()
+
+    queried_box.cert_img_url = new_data['imageUrl']
+    queried_box.cert_created_at = datetime.now().strftime('%Y-%m-%d')
+
+    db.session.commit()
+
+    return jsonify(result='success',
+                   message='Succeeded to save certification image'), 200
 
 
-@app.route('/certifications/<int:donation_box_id>', methods=['GET'])
+@app.route('/certifications', methods=['GET'])
 @jwt_required()
-def get_certification(donation_box_id):
-    pass
+def get_certification_image():
+    box_id = request.args.get('boxId', type=int)
+
+    if box_id is None:
+        return jsonify(result='failure',
+                       message='Invalid Data: No boxId found'), 401
+
+    user_id = get_jwt_identity()
+    queried_box = donation_box.DonationBox.query.filter_by(user_id=user_id, box_id=box_id).first()
+
+    if queried_box is None:
+        return jsonify(result='failure',
+                       message='No Donation Box found'), 401
+
+    user_data = user.User.query.filter_by(user_id=user_id).first()
+
+    if user_data is None or user_data.name is None:
+        return jsonify(result='failure',
+                       message='No User found'), 401
+
+    message_data = message.Message.query.filter_by(box_id=box_id).all()
+    donors_name_list = []
+
+    if message_data is not []:
+        for msg in message_data:
+            donors_name_list.append(msg.created_by)
+
+    res_data = {
+        'box_id': queried_box.box_id,
+        'name': queried_box.name,
+        'box_created_by': user_data.name,
+        'donors_name_list': donors_name_list,
+        'cert_img_url': queried_box.cert_img_url,
+        'cert_created_at': queried_box.cert_created_at
+    }
+
+    result = json.dumps({
+        'result': 'succeed',
+        'message': 'Succeeded to get certification image',
+        'data': camel_dict(res_data)
+    }, ensure_ascii=False, indent=4, default=json_serial_timestamp)
+
+    res = make_response(result)
+    return res, 200
 
 
 # Run the App
