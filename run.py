@@ -270,7 +270,9 @@ def get_donation_box_for_guest(donation_box_id):
         return jsonify(result='failure',
                        message='No Donation Box found'), 403
 
+    user_name = user.User.query.filter_by(user_id=queried_donation_box.user_id).first().name
     res_data = dict(queried_donation_box)
+    res_data.update({'created_by': user_name})
     res_data.update({'message_count': queried_messages_count})
 
     result = json.dumps({
