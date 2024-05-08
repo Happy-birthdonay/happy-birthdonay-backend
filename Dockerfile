@@ -9,5 +9,5 @@ WORKDIR $APP_HOME
 COPY . ./
 
 RUN pip3 install --no-cache-dir -r requirements.txt
-RUN pip3 install build
-RUN python3 -m build
+
+CMD exec gunicorn --bind :$PORT --workers 1 --threads 8 --timeout 0 main:app
