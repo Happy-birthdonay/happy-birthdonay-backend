@@ -10,7 +10,7 @@ class User(db.Model):
     - user_id: 사용자 아이디, INT, PK
     - name: 사용자 이름, VARCHAR(50)
     - birthday: 사용자 생일, VARCHAR(6)
-    - kakao_id: 카카오 아이디, INT
+    - kakao_id: 카카오 아이디, VARCHAR(20)
     - updated_at: 업데이트 시간, DATETIME
     """
 
@@ -19,7 +19,7 @@ class User(db.Model):
     user_id = db.Column(db.Integer, primary_key=True, autoincrement=True, nullable=False)
     name = db.Column(db.String(50), nullable=False)
     birthday = db.Column(db.String(6), nullable=False)
-    kakao_id = db.Column(db.Integer, nullable=False)
+    kakao_id = db.Column(db.String(20), nullable=False)
     updated_at = db.Column(db.DateTime, nullable=True)
 
     def __init__(self, name, birthday, kakao_id):
