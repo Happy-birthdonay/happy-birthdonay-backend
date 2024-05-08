@@ -23,6 +23,13 @@ logger = logging.create_logger(app)
 
 
 # Routes
+
+@app.route('/ping')
+def ping():
+    print('ping pong test')
+    return 'pong'
+
+
 @app.route('/refresh')
 @jwt_required(refresh=True)
 def refresh():
