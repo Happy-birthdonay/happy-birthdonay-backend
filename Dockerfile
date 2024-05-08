@@ -1,4 +1,4 @@
-FROM python:3.11.7
+FROM python:3.10
 
 ENV APP_HOME /app
 
