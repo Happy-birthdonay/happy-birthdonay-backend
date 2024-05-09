@@ -363,6 +363,16 @@ def create_message():
         else:
             setattr(new_message, key, new_data[camel_str(key)])
 
+    box_id = new_data['boxId']
+    user_id = donation_box.DonationBox.query.filter_by(box_id=box_id).first().user_id
+    birthday = user.User.query.filter_by(user_id=user_id).first().birthday
+    today = datetime.now()
+    end_date = datetime(today.year, int(birthday[:2]), int(birthday[2:]))
+
+    if today > end_date:
+        return jsonify(result='failure',
+                       message='Invalid Data: The donation box is already closed'), 401
+
     db.session.add(new_message)
     db.session.commit()
 
