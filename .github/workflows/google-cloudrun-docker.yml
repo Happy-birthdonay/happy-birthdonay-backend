@@ -56,6 +56,8 @@ env:
   GAR_LOCATION: env.YOUR_GAR_LOCATION # Artifact Registry location
   SERVICE: env.YOUR_SERVICE_NAME # Cloud Run service name
   REGION: env.YOUR_SERVICE_REGION # Cloud Run service region
+  WIF_PROVIDER: secret.WIF_PROVIDER
+  WIF_SERVICE_ACCOUNT: secret.WIF_SERVICE_ACCOUNT
 
 jobs:
   deploy:
@@ -76,8 +78,8 @@ jobs:
         uses: 'google-github-actions/auth@v0'
         with:
           token_format: 'access_token'
-          workload_identity_provider: '${{ secret.WIF_PROVIDER }}' # e.g. - projects/123456789/locations/global/workloadIdentityPools/my-pool/providers/my-provider
-          service_account: '${{ secret.WIF_SERVICE_ACCOUNT }}' # e.g. - my-service-account@my-project.iam.gserviceaccount.com
+          workload_identity_provider: '${{ env.WIF_PROVIDER }}' # e.g. - projects/123456789/locations/global/workloadIdentityPools/my-pool/providers/my-provider
+          service_account: '${{ env.WIF_SERVICE_ACCOUNT }}' # e.g. - my-service-account@my-project.iam.gserviceaccount.com
 
       # NOTE: Alternative option - authentication via credentials json
       # - name: Google Auth
