@@ -1,6 +1,11 @@
 import requests
 
-from kakao_config import KAKAO_REST_API_KEY, KAKAO_REDIRECT_URI, KAKAO_CLIENT_SECRET
+from app.controllers import google_secret_controller
+
+
+def get_secrets(secret_key_str):
+    secret_controller = google_secret_controller.GoogleSecretController()
+    return secret_controller.access_secret(secret_key_str)
 
 
 class KakaoOAuthController:
@@ -14,6 +19,11 @@ class KakaoOAuthController:
 
     def authorization(self, code):
         url = self.oauth_server % '/oauth/token'
+
+        KAKAO_REST_API_KEY = get_secrets('kakao_rest_api_key')
+        KAKAO_CLIENT_SECRET = get_secrets('kakao_client_secret')
+        KAKAO_REDIRECT_URI = get_secrets('kakao_redirect_uri')
+
         params = {
             'grant_type': 'authorization_code',
             'client_id': KAKAO_REST_API_KEY,

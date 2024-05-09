@@ -1,0 +1,14 @@
+from google.cloud import secretmanager
+
+PROJECT_ID = '595401715712'
+
+
+class GoogleSecretController:
+    def __init__(self):
+        self.project_id = PROJECT_ID
+
+    def access_secret(self, secret_id, version_id=1):
+        client = secretmanager.SecretManagerServiceClient()
+        name = f"projects/{self.project_id}/secrets/{secret_id}/versions/{version_id}"
+        response = client.access_secret_version(name=name)
+        return response.payload.data.decode('UTF-8')
