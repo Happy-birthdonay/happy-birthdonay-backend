@@ -3,9 +3,9 @@ import requests
 from app.controllers import google_secret_controller
 
 
-def get_secrets(secret_key_str):
+def get_secrets(secret_key_str, version_id=1):
     secret_controller = google_secret_controller.GoogleSecretController()
-    return secret_controller.access_secret(secret_key_str)
+    return secret_controller.access_secret(secret_key_str, version_id)
 
 
 class KakaoOAuthController:
@@ -22,7 +22,7 @@ class KakaoOAuthController:
 
         KAKAO_REST_API_KEY = get_secrets('kakao_rest_api_key')
         KAKAO_CLIENT_SECRET = get_secrets('kakao_client_secret')
-        KAKAO_REDIRECT_URI = get_secrets('kakao_redirect_uri')
+        KAKAO_REDIRECT_URI = get_secrets('kakao_redirect_uri', 2)
 
         params = {
             'grant_type': 'authorization_code',
