@@ -70,8 +70,6 @@ def kakao_oauth():
         return jsonify(result='failure',
                        message='Failed Kakao Login: No user information.'), 401
 
-    logger.debug(user_infos)
-
     # Query the user
     queried_user = user.User.query.filter_by(kakao_id=user_infos['id']).first()
 
@@ -97,8 +95,8 @@ def kakao_oauth():
         return res, 200
 
     # Add the new user to the database
-    new_user = user.User(name=user_infos['kakao_account']['name'],
-                         birthday=user_infos['kakao_account']['birthday'],
+    new_user = user.User(name=user_infos['kakao_account']['profile']['nickname'],
+                         birthday=datetime.today().strftime('%m%d'),
                          kakao_id=user_infos['id'])
     # TODO: - If the db commit fails, the response should be failed
     db.session.add(new_user)
