@@ -70,6 +70,8 @@ def kakao_oauth():
         return jsonify(result='failure',
                        message='Failed Kakao Login: No user information.'), 401
 
+    logger.debug(user_infos)
+
     # Query the user
     queried_user = user.User.query.filter_by(kakao_id=user_infos['id']).first()
 
