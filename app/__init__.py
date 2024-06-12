@@ -17,6 +17,7 @@ def create_app(test_config=None):
     JWT_SECRET_KEY = secret_controller.access_secret('jwt_secret_key')
 
     app.config['SQLALCHEMY_DATABASE_URI'] = DB_URL
+    app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {'pool_recycle': 280}
     app.config['JWT_SECRET_KEY'] = JWT_SECRET_KEY
     app.config['JSON_AS_ASCII'] = False
     app.config['JWT_TOKEN_LOCATION'] = JWT_TOKEN_LOCATION
