@@ -144,7 +144,7 @@ def sign_up():
     # Check if the new data is valid
     if new_data.get('name') is None or new_data.get('birthday') is None:
         return jsonify(result='failure',
-                       message='Invalid Data: No name or birthday'), 401
+                       message='Invalid Data: No name or birthday'), 400
 
     # Update the user
     if new_data['name'] != curr_user.name:
@@ -180,10 +180,6 @@ def get_users():
     # Query the user
     curr_user = user.User.query.filter_by(user_id=user_id).first()
 
-    if curr_user is None:
-        return jsonify(result='failure',
-                       message='No User found'), 401
-
     # Make the response data
     user_data = {
         'user_id': curr_user.user_id,
@@ -215,7 +211,7 @@ def edit_user_info():
     # Check if the new data is valid
     if new_data.get('name') is None or new_data.get('birthday') is None:
         return jsonify(result='failure',
-                       message='Invalid Data: No name or birthday'), 401
+                       message='Invalid Data: No name or birthday'), 400
 
     # Update the user
     if new_data['name'] != curr_user.name:
@@ -253,7 +249,7 @@ def delete_user():
 
     if curr_user is None:
         return jsonify(result='failure',
-                       message='No User found'), 401
+                       message='No User found'), 404
 
     # Delete the user from the database
     db.session.delete(curr_user)
@@ -277,7 +273,7 @@ def create_donation_box():
     for key in donation_box.BOX_VALUES:
         if new_data.get(camel_str(key)) is None:
             return jsonify(result='failure',
-                           message=f'Invalid Data: No {camel_str(key)}'), 401
+                           message=f'Invalid Data: No {camel_str(key)}'), 400
         else:
             setattr(new_donation_box, key, new_data[camel_str(key)])
 
@@ -313,7 +309,7 @@ def get_donation_boxes():
 
     if donation_boxes is None:
         return jsonify(result='failure',
-                       message='No Donation Box found'), 401
+                       message='No Donation Box found'), 404
 
     # Make the response data
     res_data = [camel_dict({
@@ -338,7 +334,7 @@ def get_donation_box_for_guest(donation_box_id):
 
     if queried_donation_box is None:
         return jsonify(result='failure',
-                       message='No Donation Box found'), 403
+                       message='No Donation Box found'), 404
 
     user_name = user.User.query.filter_by(user_id=queried_donation_box.user_id).first().name
     res_data = dict(queried_donation_box)
@@ -368,7 +364,7 @@ def get_donation_box(donation_box_id):
 
     if queried_donation_box is None:
         return jsonify(result='failure',
-                       message='No Donation Box found'), 403
+                       message='No Donation Box found'), 404
 
     # Make the response data
     res_data = dict(queried_donation_box)
@@ -393,7 +389,7 @@ def update_donation_box(donation_box_id):
 
     if new_data.get('isDonated') is None:
         return jsonify(result='failure',
-                       message='Invalid Data: No isDonated variable'), 401
+                       message='Invalid Data: No isDonated variable'), 404
 
     # Get the user id from the token
     user_id = get_jwt_identity()
@@ -403,7 +399,7 @@ def update_donation_box(donation_box_id):
 
     if queried_donation_box is None:
         return jsonify(result='failure',
-                       message=f'No Donation Box found: id {donation_box_id}'), 401
+                       message=f'No Donation Box found: id {donation_box_id}'), 404
 
     # Commit the changes to the database and make the response data
     queried_donation_box.is_donated = new_data['isDonated']
@@ -422,19 +418,9 @@ def create_message():
     for key in message.MESSAGE_VALUES:
         if new_data.get(camel_str(key)) is None:
             return jsonify(result='failure',
-                           message=f'Invalid Data: No {camel_str(key)}'), 401
+                           message=f'Invalid Data: No {camel_str(key)}'), 400
         else:
             setattr(new_message, key, new_data[camel_str(key)])
-
-    box_id = new_data['boxId']
-    user_id = donation_box.DonationBox.query.filter_by(box_id=box_id).first().user_id
-    birthday = user.User.query.filter_by(user_id=user_id).first().birthday
-    today = datetime.now()
-    end_date = datetime(today.year, int(birthday[:2]), int(birthday[2:]))
-
-    if today > end_date:
-        return jsonify(result='failure',
-                       message='Invalid Data: The donation box is already closed'), 401
 
     db.session.add(new_message)
     db.session.commit()
@@ -456,14 +442,14 @@ def get_messages():
     # Check if the box_id is valid
     if box_id is None:
         return jsonify(result='failure',
-                       message='Invalid Data: No boxId'), 401
+                       message='Invalid Data: No boxId'), 404
 
     # Check if the box_id is matched with the user_id
     curr_box = donation_box.DonationBox.query.filter_by(user_id=user_id, box_id=box_id).first()
 
     if curr_box is None:
         return jsonify(result='failure',
-                       message='Invalid Data: BoxId and userId are not matched'), 401
+                       message='Invalid Data: BoxId and userId are not matched'), 404
 
     # Query the messages
     queried_messages = message.Message.query.filter_by(box_id=box_id).all()
@@ -488,7 +474,7 @@ def save_certification_image():
 
     if new_data.get('boxId') is None or new_data.get('imageUrl') is None:
         return jsonify(result='failure',
-                       message='Invalid Data: No boxId or imageUrl found'), 401
+                       message='Invalid Data: No boxId or imageUrl found'), 404
 
     user_id = get_jwt_identity()
 
@@ -510,20 +496,20 @@ def get_certification_image():
 
     if box_id is None:
         return jsonify(result='failure',
-                       message='Invalid Data: No boxId found'), 401
+                       message='Invalid Data: No boxId found'), 404
 
     user_id = get_jwt_identity()
     queried_box = donation_box.DonationBox.query.filter_by(user_id=user_id, box_id=box_id).first()
 
     if queried_box is None:
         return jsonify(result='failure',
-                       message='No Donation Box found'), 401
+                       message='No Donation Box found'), 404
 
     user_data = user.User.query.filter_by(user_id=user_id).first()
 
     if user_data is None or user_data.name is None:
         return jsonify(result='failure',
-                       message='No User found'), 401
+                       message='No User found'), 404
 
     message_data = message.Message.query.filter_by(box_id=box_id).all()
     donors_name_list = []
