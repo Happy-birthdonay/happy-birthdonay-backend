@@ -4,9 +4,11 @@ from flask import request, jsonify, logging, make_response
 from flask_jwt_extended import JWTManager, create_access_token, create_refresh_token, jwt_required, get_jwt_identity
 from datetime import datetime, timedelta
 
+import config
 from app import create_app, db
 
 from app.controllers.kakao_oauth_controller import KakaoOAuthController
+from app.controllers.s3_controller import S3Controller
 
 from app.models import user_model as user
 from app.models import donation_box_model as donation_box
@@ -472,20 +474,20 @@ def get_messages():
     return res, 200
 
 
-@app.route('/certifications', methods=['PATCH'])
+@app.route('/certifications/<int:donation_box_id>', methods=['POST'])
 @jwt_required()
-def save_certification_image():
-    new_data = request.get_json()
+def save_certification_image(donation_box_id):
+    new_data = request.files['imageData']
 
-    if new_data.get('boxId') is None or new_data.get('imageUrl') is None:
-        return jsonify(result='failure',
-                       message='Invalid Data: No boxId or imageUrl found'), 404
+    s3_client = S3Controller()
+    s3_client.put_object(f'{donation_box_id}.png', new_data)
+    image_url = s3_client.get_image_url(f'{donation_box_id}.png')
 
     user_id = get_jwt_identity()
 
-    queried_box = donation_box.DonationBox.query.filter_by(user_id=user_id, box_id=new_data['boxId']).first()
+    queried_box = donation_box.DonationBox.query.filter_by(user_id=user_id, box_id=donation_box_id).first()
 
-    queried_box.cert_img_url = new_data['imageUrl']
+    queried_box.cert_img_url = image_url
     queried_box.cert_created_at = datetime.now().strftime('%Y-%m-%d')
 
     db.session.commit()
@@ -494,17 +496,11 @@ def save_certification_image():
                    message='Succeeded to save certification image'), 200
 
 
-@app.route('/certifications', methods=['GET'])
+@app.route('/certifications/<int:donation_box_id>', methods=['GET'])
 @jwt_required()
-def get_certification_image():
-    box_id = request.args.get('boxId', type=int)
-
-    if box_id is None:
-        return jsonify(result='failure',
-                       message='Invalid Data: No boxId found'), 404
-
+def get_certification_image(donation_box_id):
     user_id = get_jwt_identity()
-    queried_box = donation_box.DonationBox.query.filter_by(user_id=user_id, box_id=box_id).first()
+    queried_box = donation_box.DonationBox.query.filter_by(user_id=user_id, box_id=donation_box_id).first()
 
     if queried_box is None:
         return jsonify(result='failure',
@@ -516,7 +512,7 @@ def get_certification_image():
         return jsonify(result='failure',
                        message='No User found'), 404
 
-    message_data = message.Message.query.filter_by(box_id=box_id).all()
+    message_data = message.Message.query.filter_by(box_id=donation_box_id).all()
     donors_name_list = []
 
     if message_data is not []:
