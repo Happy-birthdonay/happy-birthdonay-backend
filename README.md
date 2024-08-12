@@ -1,10 +1,28 @@
 # happy-birthdonay-backend
 
-### Dev
-Python / Flask
+## Service
+생일을 기념해 친구들에게 메시지를 받고, 메시지 개수만큼 원하는 곳에 기부할 수 있는 웹사이트.
 
-AWS EC2, S3 / GCP CloudRun
+[Happy BirthDonay!](https://happy-birthdonay-frontend.vercel.app)
 
+## Screen Shots
+![1](https://private-user-images.githubusercontent.com/75126613/357037796-9418cc0e-a762-42a0-bc95-60caf48d461a.png?jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3MjM0NjQ4MjQsIm5iZiI6MTcyMzQ2NDUyNCwicGF0aCI6Ii83NTEyNjYxMy8zNTcwMzc3OTYtOTQxOGNjMGUtYTc2Mi00MmEwLWJjOTUtNjBjYWY0OGQ0NjFhLnBuZz9YLUFtei1BbGdvcml0aG09QVdTNC1ITUFDLVNIQTI1NiZYLUFtei1DcmVkZW50aWFsPUFLSUFWQ09EWUxTQTUzUFFLNFpBJTJGMjAyNDA4MTIlMkZ1cy1lYXN0LTElMkZzMyUyRmF3czRfcmVxdWVzdCZYLUFtei1EYXRlPTIwMjQwODEyVDEyMDg0NFomWC1BbXotRXhwaXJlcz0zMDAmWC1BbXotU2lnbmF0dXJlPTJlODg4NzViNmI4MzRhMzAwYzY2MzM4YTI2MWFiYzU1NGU3MTExYzI2NzcwMTFmOTZmNzEyMmYzNzBkMmM1NDcmWC1BbXotU2lnbmVkSGVhZGVycz1ob3N0JmFjdG9yX2lkPTAma2V5X2lkPTAmcmVwb19pZD0wIn0.G-zVY692Fi6U1p_golzH8gLoJjb8O-1hDi_44x14Fsc)
+![2](https://private-user-images.githubusercontent.com/75126613/357037798-470a8d88-5438-4f30-83f2-15b1d159d29d.png?jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3MjM0NjQ4MjQsIm5iZiI6MTcyMzQ2NDUyNCwicGF0aCI6Ii83NTEyNjYxMy8zNTcwMzc3OTgtNDcwYThkODgtNTQzOC00ZjMwLTgzZjItMTViMWQxNTlkMjlkLnBuZz9YLUFtei1BbGdvcml0aG09QVdTNC1ITUFDLVNIQTI1NiZYLUFtei1DcmVkZW50aWFsPUFLSUFWQ09EWUxTQTUzUFFLNFpBJTJGMjAyNDA4MTIlMkZ1cy1lYXN0LTElMkZzMyUyRmF3czRfcmVxdWVzdCZYLUFtei1EYXRlPTIwMjQwODEyVDEyMDg0NFomWC1BbXotRXhwaXJlcz0zMDAmWC1BbXotU2lnbmF0dXJlPWQzMTEyYzkwNTQ3YmRiNDFhZTVhNmY1ZjhiY2FmODJmMjlhMjllZWNiMmI3YTNhNjhmOWZiNDU2NzhlZDEwNDkmWC1BbXotU2lnbmVkSGVhZGVycz1ob3N0JmFjdG9yX2lkPTAma2V5X2lkPTAmcmVwb19pZD0wIn0.B4LRyFMcBkvHiJrizOyPFwENH90AnZPlKdz6FzKcPj4)
+
+## Dev
+
+### Stack
+#### Language/Framework
+- Python/Flask
+
+#### Database/ORM
+- MySQL/SQLAlchemy
+
+#### Cloud
+- AWS EC2, S3
+- GCP CloudRun
 
 ### API
+API 문서는 wiki에 정리 되어 있습니다.
+
 [API Specification](https://github.com/Happy-birthdonay/wiki/blob/main/API/20240222-api-specification.md)
