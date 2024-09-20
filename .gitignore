@@ -7,6 +7,8 @@ config.py
 # Kakao login Config
 kakao_config.py
 
+# GCP Config
+planar-alliance-421215-18a00d489f97.json
 
 ### Flask ###
 instance/*

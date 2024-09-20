@@ -1,7 +1,9 @@
 from google.cloud import secretmanager
+import os
 
 PROJECT_ID = '595401715712'
-
+CREDENTIAL_PATH = '/Users/eunbin/Dev/happy-birthdonay-backend/planar-alliance-421215-18a00d489f97.json'
+os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = CREDENTIAL_PATH
 
 class GoogleSecretController:
     def __init__(self):
