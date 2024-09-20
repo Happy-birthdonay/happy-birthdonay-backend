@@ -122,7 +122,8 @@ def get_donation_box(donation_box_id):
     today_str = datetime.today().strftime('%m%d')
     open_date_year = datetime.today().year
     if open_date_str < today_str:
-        open_date_year += 1
+        if queried_donation_box.isDonated is False:
+            open_date_year += 1
 
     # Make the response data
     res_data = dict(queried_donation_box)
