@@ -122,9 +122,7 @@ def get_donation_box(donation_box_id):
     # Need to update: - compare times between today and the open date(birthday, created_at)
     today_str = datetime.today().strftime('%m%d')
     open_date_year = datetime.today().year
-    if open_date_str is today_str:
-        open_date_str = str(int(open_date_str) + 1)
-    elif open_date_str < today_str:
+    if open_date_str < today_str:
         if queried_donation_box.isDonated is False:
             open_date_year += 1
 
